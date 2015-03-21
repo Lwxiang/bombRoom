@@ -1,3 +1,0 @@
-libraries:
-- name: "django"
-  version: "1.6"
