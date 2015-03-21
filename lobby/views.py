@@ -22,7 +22,7 @@ def allot(request):
         player.name = request.POST.get('name')
         player.save()
     request.session['uid'] = player.id
-    request.session.set_expiry(10)
+    request.session.set_expiry(60)
     return HttpResponse(json.dumps({'uid': player.id, 'name': player.name, 'session': request.session.get_expiry_age()}))
 
 
@@ -55,8 +55,8 @@ def room(request):
     host = request.POST.get('host')
     info = {}
     item = Room.objects.get(host=host)
-    info['host'] = Player.find_name(item.host)
-    info['id'] = item.host
+    info['name'] = Player.find_name(item.host)
+    info['host'] = item.host
     info['num'] = item.num
     info['length'] = item.length
     info['capacity'] = item.capacity
@@ -135,7 +135,7 @@ def leave_room(request):
         item.save()
     player.status = "Idle"
     player.save()
-    return HttpResponse('success')
+    return HttpResponse('/hall/')
 
 
 def change_room(request):
@@ -153,7 +153,7 @@ def change_room(request):
     item.length = int(request.POST.get('length'))
     item.energy = int(request.POST.get('energy'))
     item.save()
-    return HttpResponse('success')
+    return HttpResponse('/hall/')
 
 
 
