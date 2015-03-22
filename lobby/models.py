@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from django.db import models
 
+from game.models import Game
+
 
 class Room(models.Model):
     host = models.IntegerField(max_length=100)
@@ -9,6 +11,7 @@ class Room(models.Model):
     capacity = models.IntegerField(default=4)
     length = models.IntegerField(default=4)
     energy = models.IntegerField(default=3)
+    game = models.ForeignKey(Game, blank=True)
 
     @staticmethod
     def get_total():
@@ -21,6 +24,9 @@ class Room(models.Model):
 class Player(models.Model):
     name = models.CharField(max_length=100)
     status = models.CharField(max_length=100, default="Idle")
+    where = models.IntegerField(default=0, blank=True)
+    face = models.IntegerField(default=0, blank=True)
+    alive = models.BooleanField(default=True)
 
     @staticmethod
     def find_name(uid):

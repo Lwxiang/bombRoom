@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
+import random
 
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
@@ -24,7 +25,7 @@ def allot(request):
             player.name = request.POST.get('name')
             player.save()
         request.session['uid'] = player.id
-        request.session.set_expiry(60)
+        request.session.set_expiry(600)
         info = {'uid': player.id, 'name': player.name, 'session': request.session.get_expiry_age()}
         status = "1"
     response = HttpResponse(json.dumps({'status': status, 'info': info}))
@@ -97,6 +98,8 @@ def host_room(request):
             item.game = game_init()
             item.save()
             player.status = "Host"
+            player.where = uid
+            player.face = random.randint(0, 3)
             player.save()
             status = "1"
     response = HttpResponse(json.dumps({'status': status, 'info': info}))
@@ -127,6 +130,8 @@ def enter_room(request):
                         item.save()
 
                         player.status = "Indoor"
+                        player.where = host
+                        player.face = random.randint(0, 3)
                         player.save()
                         status = "1"
                         flag = False
