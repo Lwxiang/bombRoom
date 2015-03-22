@@ -47,6 +47,7 @@ def game_start(request):
             game.start = True
             game.turn = random.randint(0, room.num - 1)
             game.times = 0
+            game.left = room.num
             game.save()
 
             # Make the default position
@@ -196,6 +197,7 @@ def action(request):
                                 get += bomb[x * room.length + y + 1: room.length * room.length]
                             game.no += 1
                             game.status += str(game.no) + ',' + str(uid) + ',' + "dD" + ',' + color[int(game.turn)] + ";"
+                            game.left -= 1
                             game.save()
                             player.alive = False
                             player.save()
@@ -231,6 +233,8 @@ def turn_to(request):
             members = room.members.split(';')
             if members[game.turn] == str(uid):
                 status = "1"
+                if game.left == 1:
+                    status = "7"
             else:
                 status = "0"
     response = HttpResponse(json.dumps({'status': status, 'info': info}))
@@ -299,6 +303,10 @@ def query(request):
                     xdata['color'] = ss[3]
                     info['data'].append(xdata)
             info['position'] = str(game.position).split(';')
+            info['order_id'] = str(room.members).split(';')
+            info['order_name'] = []
+            for k in info['order_id']:
+                info['order_name'].append(Player.find_name(int(k)))
             status = "1"
     response = HttpResponse(json.dumps({'status': status, 'info': info}))
     response['Access-Control-Allow-Origin'] = '*'

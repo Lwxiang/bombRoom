@@ -11,3 +11,4 @@ class Game(models.Model):
     turn = models.IntegerField(default=0)
     times = models.IntegerField(default=0)
     start = models.BooleanField(default=False)
+    left = models.IntegerField(default=0)
