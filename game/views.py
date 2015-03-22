@@ -142,7 +142,7 @@ def action(request):
                     game.save()
                     z = 0
                     for i in range(0, room.num):
-                        if members[i] == uid:
+                        if int(members[i]) == int(uid):
                             z = i
                             break
                     item = game.position.split(';')
