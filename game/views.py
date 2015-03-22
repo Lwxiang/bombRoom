@@ -160,10 +160,7 @@ def action(request):
                     x = int(str(item[z]).split(',')[0])
                     y = int(str(item[z]).split(',')[1])
                     bomb = game.bomb
-                    if x == 0 and y == 0:
-                        get = ""
-                    else:
-                        get = bomb[0: x * room.length + y - 1]
+                    get = bomb[0: x * room.length + y]
                     get += '1'
                     if x == (room.length - 1) and y == (room.length - 1):
                         get += ""
@@ -180,7 +177,7 @@ def action(request):
                 if flag:
                     game.times += 1
                     game.save()
-                    if game.times == room.energy:
+                    if game.times >= room.energy:
                         z = 0
                         for i in range(0, room.num):
                             if members[i] == uid:
@@ -190,11 +187,8 @@ def action(request):
                         x = int(str(item[z]).split(',')[0])
                         y = int(str(item[z]).split(',')[1])
                         bomb = game.bomb
-                        if game.bomb[0: x * room.length + y - 1] == '1':
-                            if x == 0 and y == 0:
-                                get = ""
-                            else:
-                                get = bomb[0: x * room.length + y - 1]
+                        if bomb[x * room.length + y] == '1':
+                            get = bomb[0: x * room.length + y]
                             get += '0'
                             if x == (room.length - 1) and y == (room.length - 1):
                                 get += ""
@@ -296,8 +290,13 @@ def query(request):
                             word += u" 您 提前结束了回合。(现在面向 " + direction[int(ss[3])]
                         else:
                             word += " " + name + u" 执行了一次操作"
+                    if ss[2] == "dD":
+                        if selfs:
+                            word += u" 您 被炸飞了desu。输掉了游戏。"
+                        else:
+                            word += " " + name + u"被人炸飞了。输掉了游戏。"
                     xdata['content'] = word
-                    xdata['color'] = ss[4]
+                    xdata['color'] = ss[3]
                     info['data'].append(xdata)
             info['position'] = str(game.position).split(';')
             status = "1"
