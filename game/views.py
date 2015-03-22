@@ -22,6 +22,7 @@ def game_init():
     game.bomb = '0' * 4 * 4
     game.wall = '0' * 4 * 4
     game.save()
+
     return game
 
 
@@ -284,6 +285,7 @@ def query(request):
             mid = int(request.POST.get('mid'))
             seq = game.status.split(';')
             info['uid'] = uid
+            info['name'] = Player.find_name(uid)
             info['data'] = {}
             direction = ('东', '北', '西', '南')
             for i in range(0, len(seq) - 1):
