@@ -26,6 +26,20 @@ def game_init():
     return game
 
 
+def game_over(host):
+    room = Room.objects.get(host=host)
+    game = room.game
+    members = room.members.split(';')
+    for i in members:
+        player = Player.objects.get(id=int(i))
+        player.status = "Idle"
+        player.alive = True
+        player.save()
+    game.delete()
+    room.save()
+    room.delete()
+
+
 def game_start(request):
     info = {}
     if not ('uid' in request.session):
@@ -231,10 +245,13 @@ def turn_to(request):
             room = Room.objects.get(host=player.where)
             game = room.game
             members = room.members.split(';')
-            if members[game.turn] == str(uid):
+            if not player.alive:
+                status = "8"
+            elif members[game.turn] == str(uid):
                 status = "1"
                 if game.left == 1:
                     status = "7"
+                    game_over(room.host)
             else:
                 status = "0"
     response = HttpResponse(json.dumps({'status': status, 'info': info}))
