@@ -104,7 +104,6 @@ def action(request):
             game = room.game
             game.no += 1
             members = room.members.split(';')
-            ss = room.num
             if members[game.turn] != str(uid):
                 status = "5"
             else:
@@ -175,47 +174,13 @@ def action(request):
                     flag = True
                 if move == "endTurn()":
                     game.status += str(game.no) + ',' + str(uid) + ',' + "eT" + ',' + str(player.face) + ',' + color[int(game.turn)] + ";"
-                    while True:
-                        game.turn = (game.turn + 1) % room.num
-                        player = Player.objects.get(id=int(members[game.turn]))
-                        if player.alive:
-                            break
-                    game.times = 0
+                    game.times = room.energy
                     game.save()
-                    z = 0
-                    for i in range(0, room.num):
-                        if members[i] == uid:
-                            z = i
-                            break
-                    item = game.position.split(';')
-                    x = int(str(item[z]).split(',')[0])
-                    y = int(str(item[z]).split(',')[1])
-                    bomb = game.bomb
-                    if game.bomb[0: x * room.length + y - 1] == '1':
-                        if x == 0 and y == 0:
-                            get = ""
-                        else:
-                            get = bomb[0: x * room.length + y - 1]
-                        get += '0'
-                        if x == (room.length - 1) and y == (room.length - 1):
-                            get += ""
-                        else:
-                            get += bomb[x * room.length + y + 1: room.length * room.length]
-                        game.save()
-                        player.alive = False
-                        player.save()
                     flag = True
                 if flag:
                     game.times += 1
                     game.save()
                     if game.times == room.energy:
-                        while True:
-                            game.turn = (game.turn + 1) % room.num
-                            player = Player.objects.get(id=int(members[game.turn]))
-                            if player.alive:
-                                break
-                        game.times = 0
-                        game.save()
                         z = 0
                         for i in range(0, room.num):
                             if members[i] == uid:
@@ -235,9 +200,18 @@ def action(request):
                                 get += ""
                             else:
                                 get += bomb[x * room.length + y + 1: room.length * room.length]
+                            game.no += 1
+                            game.status += str(game.no) + ',' + str(uid) + ',' + "dD" + ',' + color[int(game.turn)] + ";"
                             game.save()
                             player.alive = False
                             player.save()
+                        while True:
+                            game.turn = (game.turn + 1) % room.num
+                            player = Player.objects.get(id=int(members[game.turn]))
+                            if player.alive:
+                                break
+                        game.times = 0
+                        game.save()
                     status = "1"
                 else:
                     game.no -= 1
@@ -286,44 +260,45 @@ def query(request):
             seq = game.status.split(';')
             info['uid'] = uid
             info['name'] = Player.find_name(uid)
-            info['data'] = {}
-            direction = ('东', '北', '西', '南')
+            info['data'] = []
+            direction = (u'东', u'北', u'西', u'南')
             for i in range(0, len(seq) - 1):
                 if i >= mid:
-                    info['data'][i] = {}
+                    xdata = {}
                     ss = str(seq[i]).split(',')
-                    info['data'][i]['mid'] = ss[0]
-                    info['data'][i]['uid'] = ss[1]
+                    xdata['mid'] = ss[0]
+                    xdata['uid'] = ss[1]
                     name = Player.find_name(int(ss[1]))
                     selfs = (int(ss[1]) == int(uid))
                     word = ""
                     if ss[2] == "tL":
                         if selfs:
-                            word += " 您 向左转了身。(现在面向 " + direction[int(ss[3])]
+                            word += u" 您 向左转了身。(现在面向 " + direction[int(ss[3])]
                         else:
-                            word += " " + name + " 执行了一次操作"
+                            word += " " + name + u" 执行了一次操作"
                     if ss[2] == "tR":
                         if selfs:
-                            word += " 您 向右转了身。(现在面向 " + direction[int(ss[3])]
+                            word += u" 您 向右转了身。(现在面向 " + direction[int(ss[3])]
                         else:
-                            word += " " + name + " 执行了一次操作"
+                            word += " " + name + u" 执行了一次操作"
                     if ss[2] == "gF":
                         if selfs:
-                            word += " 您 向前走了一步(现在面向 " + direction[int(ss[3])]
+                            word += u" 您 向前走了一步(现在面向 " + direction[int(ss[3])]
                         else:
-                            word += " " + name + " 执行了一次操作"
+                            word += " " + name + u" 执行了一次操作"
                     if ss[2] == "pB":
                         if selfs:
-                            word += " 您 安置了一个炸弹！请注意安全！(现在面向 " + direction[int(ss[3])]
+                            word += u" 您 安置了一个炸弹！请注意安全！(现在面向 " + direction[int(ss[3])]
                         else:
-                            word += " " + name + " 执行了一次操作"
+                            word += " " + name + u" 执行了一次操作"
                     if ss[2] == "eT":
                         if selfs:
-                            word += " 您 提前结束了回合。(现在面向 " + direction[int(ss[3])]
+                            word += u" 您 提前结束了回合。(现在面向 " + direction[int(ss[3])]
                         else:
-                            word += " " + name + " 执行了一次操作"
-                    info['data'][i]['content'] = word
-                    info['data'][i]['color'] = ss[4]
+                            word += " " + name + u" 执行了一次操作"
+                    xdata['content'] = word
+                    xdata['color'] = ss[4]
+                    info['data'].append(xdata)
             info['position'] = str(game.position).split(';')
             status = "1"
     response = HttpResponse(json.dumps({'status': status, 'info': info}))
