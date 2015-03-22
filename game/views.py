@@ -95,7 +95,8 @@ def wait_start(request):
             uid = request.session.get('uid')
             info['uid'] = uid
             player = Player.objects.get(id=int(uid))
-            game = Room.objects.get(host=player.where)
+            room = Room.objects.get(host=player.where)
+            game = room.game
             if game.start:
                 status = "1"
             else:
