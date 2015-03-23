@@ -80,7 +80,7 @@ def game_start(request):
             status = "1"
 
     response = HttpResponse(json.dumps({'status': status, 'info': info}))
-    response['Access-Control-Allow-Origin'] = '*'
+    # response['Access-Control-Allow-Origin'] = '*'
     return response
 
 
@@ -102,7 +102,7 @@ def wait_start(request):
             else:
                 status = "0"
     response = HttpResponse(json.dumps({'status': status, 'info': info}))
-    response['Access-Control-Allow-Origin'] = '*'
+    # response['Access-Control-Allow-Origin'] = '*'
     return response
 
 
@@ -229,7 +229,7 @@ def action(request):
                     game.save()
                     status = "0"
     response = HttpResponse(json.dumps({'status': status, 'info': info}))
-    response['Access-Control-Allow-Origin'] = '*'
+    # response['Access-Control-Allow-Origin'] = '*'
     return response
 
 
@@ -256,7 +256,7 @@ def turn_to(request):
             else:
                 status = "0"
     response = HttpResponse(json.dumps({'status': status, 'info': info}))
-    response['Access-Control-Allow-Origin'] = '*'
+    # response['Access-Control-Allow-Origin'] = '*'
     return response
 
 
@@ -327,7 +327,7 @@ def query(request):
                 info['order_name'].append(Player.find_name(int(k)))
             status = "1"
     response = HttpResponse(json.dumps({'status': status, 'info': info}))
-    response['Access-Control-Allow-Origin'] = '*'
+    # response['Access-Control-Allow-Origin'] = '*'
     return response
 
 

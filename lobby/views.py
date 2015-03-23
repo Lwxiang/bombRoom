@@ -25,11 +25,11 @@ def allot(request):
             player.name = request.POST.get('name')
             player.save()
         request.session['uid'] = player.id
-        request.session.set_expiry(600)
+        # request.session.set_expiry(0)
         info = {'uid': player.id, 'name': player.name, 'session': request.session.get_expiry_age()}
         status = "1"
     response = HttpResponse(json.dumps({'status': status, 'info': info}))
-    response['Access-Control-Allow-Origin'] = '*'
+    # # response['Access-Control-Allow-Origin'] = '*'
     return response
 
 
@@ -54,7 +54,7 @@ def hall(request):
                     info['rooms'][step]['energy'] = item.energy
         status = "1"
     response = HttpResponse(json.dumps({'status': status, 'info': info}))
-    response['Access-Control-Allow-Origin'] = '*'
+    # response['Access-Control-Allow-Origin'] = '*'
     return response
 
 
@@ -78,7 +78,7 @@ def room(request):
             info['players'] = item.members.split(';')
             status = "1"
     response = HttpResponse(json.dumps({'status': status, 'info': info}))
-    response['Access-Control-Allow-Origin'] = '*'
+    # response['Access-Control-Allow-Origin'] = '*'
     return response
 
 
@@ -103,7 +103,7 @@ def host_room(request):
             player.save()
             status = "1"
     response = HttpResponse(json.dumps({'status': status, 'info': info}))
-    response['Access-Control-Allow-Origin'] = '*'
+    # response['Access-Control-Allow-Origin'] = '*'
     return response
 
 
@@ -138,7 +138,7 @@ def enter_room(request):
                 if flag:
                     status = "6"
     response = HttpResponse(json.dumps({'status': status, 'info': info}))
-    response['Access-Control-Allow-Origin'] = '*'
+    # response['Access-Control-Allow-Origin'] = '*'
     return response
 
 
@@ -179,7 +179,7 @@ def leave_room(request):
                 player.save()
                 status = "1"
     response = HttpResponse(json.dumps({'status': status, 'info': info}))
-    response['Access-Control-Allow-Origin'] = '*'
+    # response['Access-Control-Allow-Origin'] = '*'
     return response
 
 
@@ -204,7 +204,7 @@ def change_room(request):
                 item.save()
                 status = "1"
     response = HttpResponse(json.dumps({'status': status, 'info': info}))
-    response['Access-Control-Allow-Origin'] = '*'
+    # response['Access-Control-Allow-Origin'] = '*'
     return response
 
 

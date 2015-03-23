@@ -1,0 +1,417 @@
+@font-face {
+    font-family: 'Roboto Slab';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Roboto Slab Regular'), local('RobotoSlab-Regular'), url(../font/Roboto_Slab_400.woff2) format('woff2'), url(../font/Roboto_Slab_400.woff) format('woff');
+}
+
+@font-face {
+	font-family: 'Inder';
+	font-style: normal;
+	font-weight: 400;
+	src: url(../font/Inder.eot);
+	src: local('Inder'),
+		 url(../font/Inder.eot?#iefix) format('embedded-opentype'),
+		 url(../font/Inder.woff2) format('woff2'),
+		 url(../font/Inder.woff) format('woff');
+}
+
+@-webkit-keyframes show {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@-moz-keyframes show {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes show {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@-webkit-keyframes hide {
+	from {
+		opacity: 1;
+	}
+	to {
+		opacity: 0;
+	}
+}
+
+@-moz-keyframes hide {
+	from {
+		opacity: 1;
+	}
+	to {
+		opacity: 0;
+	}
+}
+
+@keyframes hide {
+	from {
+		opacity: 1;
+	}
+	to {
+		opacity: 0;
+	}
+}
+
+@-webkit-keyframes show-room {
+	from {
+		opacity: 0;
+	}
+	50 {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@-moz-keyframes show-room {
+	from {
+		opacity: 0;
+	}
+	50 {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes show-room {
+	from {
+		opacity: 0;
+	}
+	50 {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+article, aside, dialog, footer, header, div, footer, nav, figure, menu, main {
+	display: block;
+}
+
+html, body {
+	min-width: 100%;
+	min-height: 100%;
+	margin: 0;
+	padding: 0;
+	zoom: 1;
+	overflow: hidden;
+	background: #000000;
+}
+
+body, input, textarea, select, button {
+	font: 14px/1em 'Inder', 'Roboto Slab', Helvetica, 'Helvetica Neue', 'Microsoft Yahei', 'WenQuanYi Micro Hei', '华文细黑', 'Microsoft JhengHei', SimSun, sans-serif;
+	font-weight: 400;
+	font-size: 14px;
+	outline: none;
+}
+
+.page {
+	width: 200px;
+	/*height: 250px;*/
+	left: 0;
+	right: 0;
+	top: 25px;
+	bottom: 0;
+	margin: auto;
+	position: absolute;
+	text-align: center;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.logo, .number {
+	font-family: "Roboto Slab";
+	color: #ffffff;
+	font-weight: 700;
+	font-size: 64px;
+	line-height: 1em;
+	margin: 10px 0;
+	width: 200px;
+	word-break: break-word;
+}
+
+.entry {
+	width: 200px;
+	height: 90px;
+	/*
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	margin: auto;*/
+}
+
+.button {
+	border: 1px solid #ffffff;
+	width: 200px;
+	height: 36px;
+	font-size: 16px;
+	box-sizing: border-box;
+	display: block;
+	margin: 10px 0;
+	/*position: absolute;
+	left: 0px;*/
+}
+
+.button-create, .button-start {
+	background: #ffffff;
+	color: #000000;
+	/*top: 0px;*/
+}
+
+.button-enter, .button-leave {
+	background: #000000;
+	color: #ffffff;
+	/*bottom: 0px;*/
+}
+
+.button-return {
+	background: #7f7f7f;
+	/*border-color: #7f7f7f;*/
+	color: #ffffff;
+	opacity: 0;
+	visibility: hidden;
+	margin: 0;
+	/*bottom: 0px;*/
+}
+
+.input {
+	width: 100%;
+	margin: 10px 0;
+	border: 1px solid #ffffff;
+	height: 34px;
+	padding: 0 3px;
+	box-sizing: border-box;
+}
+
+.form {
+	margin: 0;
+	height: 0;
+	overflow: hidden;
+	opacity: 0;
+}
+
+.access, .front, .room {
+	visibility: hidden;
+	opacity: 0;
+	height: 0;
+}
+
+.access-page .access, .front-page .front, .room-page .room {
+	visibility: visible;
+	opacity: 1;
+	height: auto;
+}
+
+.access-page .form-access {
+	height: auto;
+	opacity: 1;
+	-webkit-animation: show 1.5s ease;
+	-moz-animation: show 1.5s ease;
+	animation: show 1.5s ease;
+}
+
+.front-page[data-action="create"] .form-create {
+	height: 160px;
+	opacity: 1;
+	visibility: visible;
+}
+
+.front-page[data-action="enter"] .form-enter {
+	height: 50px;
+	opacity: 1;
+	visibility: visible;
+}
+
+.front-page[data-action="create"] .button-return, .front-page[data-action="enter"] .button-return {
+	opacity: 1;
+	visibility: visible;
+}
+
+.front-page[data-action="create"] .button-enter, .front-page[data-action="enter"] .button-create {
+	height: 0;
+	opacity: 0;
+	visibility: hidden;
+	margin: 0;
+	padding: 0;
+}
+
+.message {
+	color: #ffffff;
+	overflow: hidden;
+	opacity: 0;
+}
+
+.show {
+	height: auto !important;
+	opacity: 1 !important;
+}
+
+.hide {
+	height: 0 !important;
+	opacity: 0 !important;
+}
+
+.hidden {
+	width: 0;
+	height: 0;
+	visibility: hidden;
+}
+
+.page, .button, .form, .message, .front {
+	-webkit-transition: all .5s ease;
+	-moz-transition: all .5s ease;
+	transition: all .5s ease;
+}
+
+.room-page {
+	width: 90%;
+	top: 0px;
+}
+
+.room-page .front {
+	width: 0;
+	height: 0;
+	opacity: 0;
+	visibility: hidden;
+	-webkit-animation: hide .5s ease;
+	-moz-animation: hide .5s ease;
+	animation: hide .5s ease;
+}
+
+.room-page .room {
+	-webkit-animation: show-room 1s linear;
+	-moz-animation: show-room 1s linear;
+	animation: show-room 1s linear;
+}
+
+.room-page .map {
+	margin-top: 10px;
+}
+
+.room-page .codebox {
+	position: absolute;
+	height: 100%;
+	margin-left: 220px;
+	top: 0;
+	left: 0;
+	right: 0;
+	box-sizing: border-box;
+	color: #ffffff;
+	text-align: left;
+}
+
+.codebox-output {
+	position: absolute;
+	bottom: 25px;
+	top: 0;
+	overflow: auto;
+}
+
+.codebox-output-line, .codebox-input {
+	padding-left: 20px;
+	position: relative;
+	box-sizing: border-box;
+	width: 100%;
+	margin: 0.5em 0;
+	vertical-align: middle;
+	-webkit-user-select: auto;
+	-moz-user-select: auto;
+	-ms-user-select: auto;
+	user-select: auto;
+}
+
+.codebox-output-line:after, .codebox-input:after {
+	content: '>>';
+	display: block;
+	left: 0px;
+	top: 0px;
+	position: absolute;
+}
+
+.codebox-input {
+	outline: none;
+	position: absolute;
+	bottom: 0;
+	height: 20px;
+}
+
+.codebox-input::-webkit-selection {
+	background: #ffffff;
+	color: #000000;
+}
+
+.codebox-input::-moz-selection {
+	background: #ffffff;
+	color: #000000;
+}
+
+.codebox-input:-moz-selection {
+	background: #ffffff;
+	color: #000000;
+}
+
+.codebox-input::-ms-selection {
+	background: #ffffff;
+	color: #000000;
+}
+
+.codebox-input::selection {
+	background: #ffffff;
+	color: #000000;
+}
+
+.codebox-output-line::-webkit-selection {
+	background: #ffffff;
+	color: #000000;
+}
+
+.codebox-output-line::-moz-selection {
+	background: #ffffff;
+	color: #000000;
+}
+
+.codebox-output-line:-moz-selection {
+	background: #ffffff;
+	color: #000000;
+}
+
+.codebox-output-line::-ms-selection {
+	background: #ffffff;
+	color: #000000;
+}
+
+.codebox-output-line::selection {
+	background: #ffffff;
+	color: #000000;
+}
+
+.map table {
+	border: 1px solid #ffffff;
+	width: 200px;
+	height: 200px;
+}
