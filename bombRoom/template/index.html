@@ -2,12 +2,13 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title></title>
-    {% load staticfiles %}
-<script src="{% static 'js/jquery.min.js' %}"></script>
-<link href="{% static 'css/index.css' %}" rel="stylesheet" type="text/css">
+<title>BOMB ROOM</title>
+<script src="static/js/jquery.min.js"></script>
+<link href="static/css/index.css" rel="stylesheet" type="text/css">
 </head>
-
+<!--
+(c) 2015 ccloli. 2015 年自强 Hack Day 作品 BOMB ROOM 前端页面
+-->
 <body>
 <div class="page access-page" data-action>
 	<div class="logo">BOMB ROOM</div>
@@ -113,7 +114,7 @@ var start = 0;
 var energy = 0;
 var status = -1;
 var mycolor;
-var roomData
+var roomData;
 var userData;
 var colors = [];
 
@@ -205,7 +206,7 @@ function getLatestMsg () {
 			checkMsgTimer = setTimeout(getLatestMsg, 5000);
 			$('.codebox-output').scrollTop(CodeboxOutput.height());
 			userData = data.info;
-			colorMap(data.info.order_id, data.info.position)
+			start && colorMap(data.info.order_id, data.info.position);
 		},
 		dataType: 'json'
 	});
@@ -267,7 +268,10 @@ function checkTurn () {
 		success: function(data) {
 			if (data.status == status) return;
 			if (data.status == 1) outputLine.clone().text('现在轮到您了。').appendTo(CodeboxOutput);
-			else if (data.status == 7) outputLine.clone().text('您取得了最终的胜利！').appendTo(CodeboxOutput);
+			else if (data.status == 7) {
+				outputLine.clone().text('您取得了最终的胜利！').appendTo(CodeboxOutput);
+				start = 0;
+			}
 			status = data.status;
 		},
 		dataType: 'json'
@@ -298,8 +302,11 @@ function gameStart() {
 				mycolor = colors[index];
 			})[0]
 			outputLine.clone().html('<span style="color: ' + mycolor + '">这是您的颜色</span>').appendTo(CodeboxOutput);
-			getLatestMsg();
 			start = 1;
+			getLatestMsg();
+		},
+		error: function (e) {
+			return message.addClass('show').text('HTTP Error ' + e.status + ': ' + e.statusText);
 		},
 		dataType: 'json'
 	});
@@ -308,7 +315,7 @@ function gameStart() {
 function colorMap (order, position) {
 	$('.map').html(getMapString(roomData.length));
 	for (var i = 0; i < order.length; i++) {
-		$('.map tr').eq(position[i].split(',')[0]).children('td').eq(position[i].split(',')[1]).css('background', colors[i]);
+		$('.map tr').eq(position[i].split(',')[1]).children('td').eq(position[i].split(',')[0]).css('background', colors[i]);
 	}
 }
 
@@ -333,7 +340,7 @@ entry.on('click', 'button', function (event) {
 			var formData = new FormData(form[0]);
 			message.text('正在提交数据......');
 			entry.addClass('hide');
-			$.post('http://127.0.0.1/host/', form, function(data){
+			$.post('http://121.43.228.141/host/', form, function(data){
 				console.log(data);
 			}, 'json')
 			*/
@@ -361,6 +368,9 @@ $('.form-access').on('submit', function (event) {
 			user = data.info;
 			message.removeClass('show').text('');
 			page.removeClass('access-page').addClass('front-page');
+		},
+		error: function (e) {
+			return message.addClass('show').text('HTTP Error ' + e.status + ': ' + e.statusText);
 		},
 		dataType: 'json'
 	});
@@ -403,6 +413,9 @@ $('.form-create').on('submit', function (event) {
 						showRoom(user.uid);
 					}, 1000);
 				},
+				error: function (e) {
+					return message.addClass('show').text('HTTP Error ' + e.status + ': ' + e.statusText);
+				},
 				dataType: 'json'
 			});
 		},
@@ -432,6 +445,9 @@ $('.form-enter').on('submit', function (event) {
 			page.removeClass('front-page').addClass('room-page');
 			showRoom(uid);
 		},
+		error: function (e) {
+			return message.addClass('show').text('HTTP Error ' + e.status + ': ' + e.statusText);
+		},
 		dataType: 'json'
 	});
 	return false;
@@ -460,6 +476,9 @@ CodeboxInput.on('keypress', function (event) {
 							getLatestMsg();
 							//outputLine.clone().text(data.info.content).appendTo(CodeboxOutput);
 						},
+						error: function (e) {
+							return outputLine.clone().text('HTTP Error ' + e.status + ': ' + e.statusText).appendTo(CodeboxOutput);
+						},
 						dataType: 'json'
 					});
 			//	}
@@ -483,10 +502,14 @@ $('.button-start').on('click', function (event) {
 			host: uid
 		},
 		success: function(data) {
-			if (data.status != 1) return message.text('提交失败：' + getErrorMsg(data.status));
+			if (data.status != 1) return outputLine.clone().text('提交失败：' + getErrorMsg(data.status)).appendTo(CodeboxOutput);
 			outputLine.clone().text('您开始了游戏。').appendTo(CodeboxOutput);
 			gameStart();
 			getLatestMsg();
+			$('.button-start').hide();
+		},
+		error: function (e) {
+			return outputLine.clone().text('HTTP Error ' + e.status + ': ' + e.statusText).appendTo(CodeboxOutput);
 		},
 		dataType: 'json'
 	});
@@ -504,10 +527,13 @@ $('.button-leave').on('click', function (event) {
 			host: uid
 		},
 		success: function(data) {
-			if (data.status != 1) return message.text('提交失败：' + getErrorMsg(data.status));
+			if (data.status != 1) return outputLine.clone().text('提交失败：' + getErrorMsg(data.status)).appendTo(CodeboxOutput);
 			uid = null;
 			outputLine.clone().text('您已离开游戏！').appendTo(CodeboxOutput);
 			page.removeClass('room-page').addClass('front-page');
+		},
+		error: function (e) {
+			return outputLine.clone().text('HTTP Error ' + e.status + ': ' + e.statusText).appendTo(CodeboxOutput);
 		},
 		dataType: 'json'
 	});
