@@ -206,7 +206,7 @@ function getLatestMsg () {
 			checkMsgTimer = setTimeout(getLatestMsg, 5000);
 			$('.codebox-output').scrollTop(CodeboxOutput.height());
 			userData = data.info;
-			colorMap(data.info.order_id, data.info.position)
+			start && colorMap(data.info.order_id, data.info.position);
 		},
 		dataType: 'json'
 	});
@@ -268,7 +268,10 @@ function checkTurn () {
 		success: function(data) {
 			if (data.status == status) return;
 			if (data.status == 1) outputLine.clone().text('现在轮到您了。').appendTo(CodeboxOutput);
-			else if (data.status == 7) outputLine.clone().text('您取得了最终的胜利！').appendTo(CodeboxOutput);
+			else if (data.status == 7) {
+				outputLine.clone().text('您取得了最终的胜利！').appendTo(CodeboxOutput);
+				start = 0;
+			}
 			status = data.status;
 		},
 		dataType: 'json'
@@ -299,8 +302,11 @@ function gameStart() {
 				mycolor = colors[index];
 			})[0]
 			outputLine.clone().html('<span style="color: ' + mycolor + '">这是您的颜色</span>').appendTo(CodeboxOutput);
-			getLatestMsg();
 			start = 1;
+			getLatestMsg();
+		},
+		error: function (e) {
+			return message.addClass('show').text('HTTP Error ' + e.status + ': ' + e.statusText);
 		},
 		dataType: 'json'
 	});
@@ -309,7 +315,7 @@ function gameStart() {
 function colorMap (order, position) {
 	$('.map').html(getMapString(roomData.length));
 	for (var i = 0; i < order.length; i++) {
-		$('.map tr').eq(position[i].split(',')[0]).children('td').eq(position[i].split(',')[1]).css('background', colors[i]);
+		$('.map tr').eq(position[i].split(',')[1]).children('td').eq(position[i].split(',')[0]).css('background', colors[i]);
 	}
 }
 
@@ -500,6 +506,7 @@ $('.button-start').on('click', function (event) {
 			outputLine.clone().text('您开始了游戏。').appendTo(CodeboxOutput);
 			gameStart();
 			getLatestMsg();
+			$('.button-start').hide();
 		},
 		error: function (e) {
 			return outputLine.clone().text('HTTP Error ' + e.status + ': ' + e.statusText).appendTo(CodeboxOutput);
