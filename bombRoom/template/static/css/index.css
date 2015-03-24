@@ -329,6 +329,8 @@ body, input, textarea, select, button {
 	position: absolute;
 	bottom: 25px;
 	top: 0;
+	left: 0;
+	right: 0;
 	overflow: auto;
 }
 
@@ -358,6 +360,7 @@ body, input, textarea, select, button {
 	position: absolute;
 	bottom: 0;
 	height: 20px;
+	margin: 0;
 }
 
 .codebox-input::-webkit-selection {
