@@ -200,7 +200,7 @@ function getLatestMsg () {
 			})
 			for (var i = 0, j = data.info.data; i < j.length; i++) {
 				outputLine.clone().text(j[i].content).appendTo(CodeboxOutput);
-				if (j[i].mid > mid) mid = j[i].mid;
+				if (j[i].mid - 0 > mid - 0) mid = j[i].mid - 0;
 			}
 			//for (var )
 			// outputLine.clone().text().appendTo(CodeboxOutput);
