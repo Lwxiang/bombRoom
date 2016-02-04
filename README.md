@@ -1,15 +1,14 @@
 # bombRoom
 A simple web game.
 
-前端注意：
-----------------------------
-1) 在``index.html``的各类静态资源引用前加上``{% load staticfiles %}``
+[游戏在这](http://115.28.65.51:8080/index/)
 
-2) 用``{% static 'js/jquery.min.js' %}``和``{% static 'css/index.css' %}``替换原来的url
+## TODO LIST
 
-如
-```
-{% load staticfiles %}
-<script src="{% static 'js/jquery.min.js' %}"></script>
-<link href="{% static 'css/index.css' %}" rel="stylesheet" type="text/css">
-```
+### 处理现有的BUGs, 已知的有
+
+1.后台退出房间存在错误
+
+2.后台逻辑冗余
+
+### 前端在输入房间号之前添加一个现存房间列表
