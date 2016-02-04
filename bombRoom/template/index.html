@@ -14,14 +14,14 @@
 <div class="page access-page" data-action>
 	<div class="logo">BOMB ROOM</div>
 	<div class="access">
-		<form action="http://121.43.228.141:8000/allot/" method="post" class="form form-access">
+		<form action="http://115.28.65.51:8080/allot/" method="post" class="form form-access">
 			<input type="text" class="input" name="name" placeholder="您的昵称" required="required">
 			<!--<input type="email" class="input" name="email" placeholder="您的邮箱（使用 Gravatar）" required="required">-->
 			<button class="button button-enter">进入</button>
 		</form>
 	</div>
 	<div class="front">
-		<form action="http://121.43.228.141:8000/host/" method="post" class="form form-create">
+		<form action="http://115.28.65.51:8080/host/" method="post" class="form form-create">
 			<!--<input type="text" class="input" name="" placeholder="房间名称">-->
 			<input type="text" class="input" name="capacity" placeholder="参与人数" required="required">
 			<input type="text" class="input" name="length" placeholder="房间宽高" required="required">
@@ -29,7 +29,7 @@
 			<button class="hidden"></button>
 			<!--<input type="text" class="input" name="name" placeholder="您的昵称">-->
 		</form>
-		<form action="http://121.43.228.141:8000/enter/" method="post" class="form form-enter">
+		<form action="http://115.28.65.51:8080/enter/" method="post" class="form form-enter">
 			<input type="text" class="input" name="host" placeholder="房间 ID" required="required">
 			<button class="hidden"></button>
 			<!--<input type="text" class="input" name="name" placeholder="您的昵称">
@@ -162,7 +162,7 @@ function showRoom (id) {
 	CodeboxOutput.empty();
 	$.ajax({
 		method: 'POST',
-		url: 'http://121.43.228.141:8000/room/',
+		url: 'http://115.28.65.51:8080/room/',
 		xhrFields: {
 			withCredentials: true
 		},
@@ -186,7 +186,7 @@ function getLatestMsg () {
 	clearTimeout(checkMsgTimer);
 	$.ajax({
 		method: 'POST',
-		url: 'http://121.43.228.141:8000/query/',
+		url: 'http://115.28.65.51:8080/query/',
 		xhrFields: {
 			withCredentials: true
 		},
@@ -214,7 +214,7 @@ function getLatestMsg () {
 	if (!start) {
 		$.ajax({
 			method: 'POST',
-			url: 'http://121.43.228.141:8000/room/',
+			url: 'http://115.28.65.51:8080/room/',
 			xhrFields: {
 				withCredentials: true
 			},
@@ -238,7 +238,7 @@ function checkStart () {
 	if (uid == user.uid || start) return;
 	$.ajax({
 		method: 'GET',
-		url: 'http://121.43.228.141:8000/wait/',
+		url: 'http://115.28.65.51:8080/wait/',
 		xhrFields: {
 			withCredentials: true
 		},
@@ -259,7 +259,7 @@ function checkTurn () {
 	if (!start) return;
 	$.ajax({
 		method: 'GET',
-		url: 'http://121.43.228.141:8000/turn/',
+		url: 'http://115.28.65.51:8080/turn/',
 		xhrFields: {
 			withCredentials: true
 		},
@@ -282,7 +282,7 @@ function checkTurn () {
 function gameStart() {
 	$.ajax({
 		method: 'POST',
-		url: 'http://121.43.228.141:8000/room/',
+		url: 'http://115.28.65.51:8080/room/',
 		xhrFields: {
 			withCredentials: true
 		},
@@ -400,7 +400,7 @@ $('.form-create').on('submit', function (event) {
 			formData.host = user.uid;
 			$.ajax({
 				method: 'POST',
-				url: 'http://121.43.228.141:8000/change/',
+				url: 'http://115.28.65.51:8080/change/',
 				xhrFields: {
 					withCredentials: true
 				},
@@ -465,7 +465,7 @@ CodeboxInput.on('keypress', function (event) {
 			//	if (/^(move(North|South|East|West)|putBomb|endTurn)\(\)$/.test(value)) {
 					$.ajax({
 						method: 'POST',
-						url: 'http://121.43.228.141:8000/action/',
+						url: 'http://115.28.65.51:8080/action/',
 						xhrFields: {
 							withCredentials: true
 						},
@@ -495,7 +495,7 @@ $('.button-start').on('click', function (event) {
 	if (uid == null) return;
 	$.ajax({
 		method: 'GET',
-		url: 'http://121.43.228.141:8000/start/',
+		url: 'http://115.28.65.51:8080/start/',
 		xhrFields: {
 			withCredentials: true
 		},
@@ -520,7 +520,7 @@ $('.button-leave').on('click', function (event) {
 	if (uid == null) return;
 	confirm('您确定要离开房间么？') && $.ajax({
 		method: 'POST',
-		url: 'http://121.43.228.141:8000/leave/',
+		url: 'http://115.28.65.51:8080/leave/',
 		xhrFields: {
 			withCredentials: true
 		},
