@@ -8,20 +8,20 @@
 <link href="{% static 'css/index.css' %}" rel="stylesheet" type="text/css">
 </head>
 <!--
-(c) 2015 ccloli. 2015 年自强 Hack Day 作品 BOMB ROOM 前端页面
+(c) 2015 ccloli. 2015 年自强 Hack Day 作品 BOMB ROOM
 -->
 <body>
 <div class="page access-page" data-action>
 	<div class="logo">BOMB ROOM</div>
 	<div class="access">
-		<form action="http://115.28.65.51:8080/allot/" method="post" class="form form-access">
+		<form action="{serverURL}/allot/" method="post" class="form form-access">
 			<input type="text" class="input" name="name" placeholder="您的昵称" required="required">
 			<!--<input type="email" class="input" name="email" placeholder="您的邮箱（使用 Gravatar）" required="required">-->
 			<button class="button button-enter">进入</button>
 		</form>
 	</div>
 	<div class="front">
-		<form action="http://115.28.65.51:8080/host/" method="post" class="form form-create">
+		<form action="{serverURL}/host/" method="post" class="form form-create">
 			<!--<input type="text" class="input" name="" placeholder="房间名称">-->
 			<input type="text" class="input" name="capacity" placeholder="参与人数" required="required">
 			<input type="text" class="input" name="length" placeholder="房间宽高" required="required">
@@ -29,7 +29,7 @@
 			<button class="hidden"></button>
 			<!--<input type="text" class="input" name="name" placeholder="您的昵称">-->
 		</form>
-		<form action="http://115.28.65.51:8080/enter/" method="post" class="form form-enter">
+		<form action="{serverURL}/enter/" method="post" class="form form-enter">
 			<input type="text" class="input" name="host" placeholder="房间 ID" required="required">
 			<button class="hidden"></button>
 			<!--<input type="text" class="input" name="name" placeholder="您的昵称">
@@ -43,54 +43,12 @@
 		</div>
 	</div>
 	<div class="room">
-		<div class="map">
-			<table border="1">
-				<tr>
-					<td></td>
-					<td></td>
-					<td></td>
-					<td></td>
-				</tr>
-				<tr>
-					<td></td>
-					<td></td>
-					<td></td>
-					<td></td>
-				</tr>
-				<tr>
-					<td></td>
-					<td></td>
-					<td></td>
-					<td></td>
-				</tr>
-				<tr>
-					<td></td>
-					<td></td>
-					<td></td>
-					<td></td>
-				</tr>
-			</table>
-		</div>
-		<div class="number">NO. </div>
+		<div class="map"></div>
 		<button class="button button-start">开始游戏</button>
 		<button class="button button-leave">离开房间</button>
 		<div class="codebox">
 			<div class="codebox-output">
-				<div class="codebox-output-content">
-					<div class="codebox-output-line">欢迎来到 BOMB ROOM！</div>
-					<div class="codebox-output-line">Justin 加入了房间。(5/6)</div>
-					<div class="codebox-output-line">Jeff 加入了房间。(6/6)</div>
-					<div class="codebox-output-line">游戏顺序为  <span style="color: #0f0;">Jeans</span> <span style="color: #f00;">Ben</span> <span style="color: #00f;">Jeff</span> <span style="color: #ff0;">Sam</span> <span style="color: #0ff;">Justin</span> <span style="color: #f0f;">Sandy</span>，每个回合您可至多执行三条代码。</div>
-					<div class="codebox-output-line" style="color: #f00;">这是您的颜色</div>
-					<div class="codebox-output-line">游戏开始，首先由 Jeans 操作。</div>
-					<div class="codebox-output-line" style="color: #0f0;">Jeans 执行了一次操作。</div>
-					<div class="codebox-output-line" style="color: #0f0;">Jeans 执行了一次操作。</div>
-					<div class="codebox-output-line">Jeans 完成了操作。现在轮到 您 了。</div>
-					<div class="codebox-output-line" style="color: #999;">moveWest()</div>
-					<div class="codebox-output-line" style="color: #f00;">您向西侧移动了一步。</div>
-					<div class="codebox-output-line" style="color: #999;">putBomb()</div>
-					<div class="codebox-output-line" style="color: #f00;">您安置了一个炸弹！请注意安全！</div>
-				</div>
+				<div class="codebox-output-content"></div>
 			</div>
 			<!--<textarea class="codebox-input"></textarea>-->
 			<div class="codebox-input" contenteditable="true"></div>
@@ -118,6 +76,7 @@ var mycolor;
 var roomData;
 var userData;
 var colors = [];
+var serverURL = 'http://115.28.65.51:8080';
 
 function getErrorMsg (status) {
 	var msg = ['非法操作', 'success', 'method must be post', 'method must be get', 'uid is invalid', 'no authority to do(Who try to change the room infomation is not the host)', 'the room is full or no exist'];
@@ -125,9 +84,9 @@ function getErrorMsg (status) {
 }
 
 function getMapString (length) {
-	var mapString = '<table border="1">'
+	var mapString = '<table border="1">';
 	var trString = '<tr height="' + 100 / length + '%">';
-	var tdString = '<td width="' + 100 / length + '%"></td>'
+	var tdString = '<td width="' + 100 / length + '%"></td>';
 	for (var i = 0; i < length; i++){
 		trString += tdString;
 	}
@@ -155,6 +114,13 @@ function fetchForm ($form) {
 	return data;
 }
 
+function outputLog (log, plain) {
+	var curLine = outputLine.clone();
+	if (plain) curLine.text(log);
+	else curLine.html(log);
+	curLine.appendTo(CodeboxOutput);
+}
+
 function showRoom (id) {
 	$('.number').text('No. ' + id);
 	if (id == user.uid) $('.button-start').show();
@@ -162,7 +128,7 @@ function showRoom (id) {
 	CodeboxOutput.empty();
 	$.ajax({
 		method: 'POST',
-		url: 'http://115.28.65.51:8080/room/',
+		url: serverURL + '/room/',
 		xhrFields: {
 			withCredentials: true
 		},
@@ -170,12 +136,12 @@ function showRoom (id) {
 			host: id
 		},
 		success: function(data) {
-			if (data.status != 1) return outputLine.clone().text('进入房间失败：' + getErrorMsg(data.status)).appendTo(CodeboxOutput);
+			if (data.status != 1) return outputLog('进入房间失败：' + getErrorMsg(data.status));
 			uid = id;
 			$('.map').html(getMapString(data.info.length));
-			outputLine.clone().text('欢迎来到 BOMB ROOM！').appendTo(CodeboxOutput);
-			outputLine.clone().html('可用指令：turnLeft() 向左转<br>　　　　　turnRight() 向右转<br>　　　　　goForward() 向前走<br>　　　　　putBomb() 放下炸弹<br>　　　　　endTurn() 提前结束此回合').appendTo(CodeboxOutput);
-			outputLine.clone().text('BOMB ROOM #' + id + '　房主：' + data.info.name + '　指令上限：' + data.info.energy + '　用户上限：' + data.info.capacity /*+ '　用户列表：' + data.info.players.join(', ') */+ ' (' + data.info.num + '/' + data.info.capacity +')').appendTo(CodeboxOutput);
+			outputLog('欢迎来到 BOMB ROOM！');
+			outputLog('可用指令：turnLeft() 向左转<br>　　　　　turnRight() 向右转<br>　　　　　goForward() 向前走<br>　　　　　putBomb() 放下炸弹<br>　　　　　endTurn() 提前结束此回合', 1);
+			outputLog('BOMB ROOM #' + id + '　房主：' + data.info.name + '　指令上限：' + data.info.energy + '　用户上限：' + data.info.capacity /*+ '　用户列表：' + data.info.players.join(', ') */+ ' (' + data.info.num + '/' + data.info.capacity +')');
 			getLatestMsg();
 		},
 		dataType: 'json'
@@ -186,7 +152,7 @@ function getLatestMsg () {
 	clearTimeout(checkMsgTimer);
 	$.ajax({
 		method: 'POST',
-		url: 'http://115.28.65.51:8080/query/',
+		url: serverURL + '/query/',
 		xhrFields: {
 			withCredentials: true
 		},
@@ -194,15 +160,14 @@ function getLatestMsg () {
 			mid: mid
 		},
 		success: function(data) {
-			if (data.status != 1) return outputLine.clone().text('获取消息失败：' + getErrorMsg(data.status)).appendTo(CodeboxOutput);
+			if (data.status != 1) return outputLog('获取消息失败：' + getErrorMsg(data.status));
 			data.info.data.sort(function(a, b){
 				return a.mid - b.mid;
-			})
+			});
 			for (var i = 0, j = data.info.data; i < j.length; i++) {
-				outputLine.clone().text(j[i].content).appendTo(CodeboxOutput);
+				outputLog(j[i].content);
 				if (j[i].mid - 0 > mid - 0) mid = j[i].mid - 0;
 			}
-			//for (var )
 			// outputLine.clone().text().appendTo(CodeboxOutput);
 			checkMsgTimer = setTimeout(getLatestMsg, 5000);
 			$('.codebox-output').scrollTop(CodeboxOutput.height());
@@ -214,7 +179,7 @@ function getLatestMsg () {
 	if (!start) {
 		$.ajax({
 			method: 'POST',
-			url: 'http://115.28.65.51:8080/room/',
+			url: serverURL + '/room/',
 			xhrFields: {
 				withCredentials: true
 			},
@@ -223,7 +188,7 @@ function getLatestMsg () {
 			},
 			success: function(data) {
 				if (data.info.num != num) {
-					outputLine.clone().text('BOMB ROOM #' + uid + '　房主：' + data.info.name + '　指令上限：' + data.info.energy + '　用户上限：' + data.info.capacity /*+ '　用户列表：' + data.info.players.join(', ')*/ + ' (' + data.info.num + '/' + data.info.capacity +')').appendTo(CodeboxOutput);
+					outputLog('BOMB ROOM #' + uid + '　房主：' + data.info.name + '　指令上限：' + data.info.energy + '　用户上限：' + data.info.capacity /*+ '　用户列表：' + data.info.players.join(', ')*/ + ' (' + data.info.num + '/' + data.info.capacity +')');
 					num = data.info.num;
 				}
 			},
@@ -238,7 +203,7 @@ function checkStart () {
 	if (uid == user.uid || start) return;
 	$.ajax({
 		method: 'GET',
-		url: 'http://115.28.65.51:8080/wait/',
+		url: serverURL + '/wait/',
 		xhrFields: {
 			withCredentials: true
 		},
@@ -247,7 +212,7 @@ function checkStart () {
 		},
 		success: function(data) {
 			if (data.status != 1) return;
-			outputLine.clone().text('游戏已开始。').appendTo(CodeboxOutput);
+			outputLog('游戏已开始。');
 			start = 1;
 			gameStart();
 		},
@@ -259,7 +224,7 @@ function checkTurn () {
 	if (!start) return;
 	$.ajax({
 		method: 'GET',
-		url: 'http://115.28.65.51:8080/turn/',
+		url: serverURL + '/turn/',
 		xhrFields: {
 			withCredentials: true
 		},
@@ -268,9 +233,9 @@ function checkTurn () {
 		},
 		success: function(data) {
 			if (data.status == status) return;
-			if (data.status == 1) outputLine.clone().text('现在轮到您了。').appendTo(CodeboxOutput);
+			if (data.status == 1) outputLog('现在轮到您了。');
 			else if (data.status == 7) {
-				outputLine.clone().text('您取得了最终的胜利！').appendTo(CodeboxOutput);
+				outputLog('您取得了最终的胜利！');
 				start = 0;
 			}
 			status = data.status;
@@ -282,7 +247,7 @@ function checkTurn () {
 function gameStart() {
 	$.ajax({
 		method: 'POST',
-		url: 'http://115.28.65.51:8080/room/',
+		url: serverURL + '/room/',
 		xhrFields: {
 			withCredentials: true
 		},
@@ -290,19 +255,19 @@ function gameStart() {
 			host: uid
 		},
 		success: function(data) {
-			if (data.status != 1) return outputLine.clone().text('初始化失败：' + getErrorMsg(data.status)).appendTo(CodeboxOutput);
+			if (data.status != 1) return outputLog('初始化失败：' + getErrorMsg(data.status));
 			roomData = data.info;
 			for (var i = 0; i < data.info.num; i++) {
 				colors.push('rgb(' + Math.floor(Math.random() * 256) + ',' + Math.floor(Math.random() * 256) + ',' + Math.floor(Math.random() * 256) + ')');
 			}
 			$('.map').html(getMapString(data.info.length));
-			outputLine.clone().html('BOMB ROOM #' + uid + '　房主：' + data.info.name + '　指令上限：' + data.info.energy + '　用户上限：' + data.info.capacity + '　用户列表：' + data.info.players.map(function(elem, index){
+			outputLog('BOMB ROOM #' + uid + '　房主：' + data.info.name + '　指令上限：' + data.info.energy + '　用户上限：' + data.info.capacity + '　用户列表：' + data.info.players.map(function(elem, index){
 				return '<span style="color: ' + colors[index] + '">' + elem + '</span>';
-			}).join(', ') + ' (' + data.info.num + '/' + data.info.capacity +')').appendTo(CodeboxOutput);
+			}).join(', ') + ' (' + data.info.num + '/' + data.info.capacity +')', 1);
 			data.info.players.filter(function(elem, index){
 				mycolor = colors[index];
-			})[0]
-			outputLine.clone().html('<span style="color: ' + mycolor + '">这是您的颜色</span>').appendTo(CodeboxOutput);
+			})[0];
+			outputLog('<span style="color: ' + mycolor + '">这是您的颜色</span>', 1);
 			start = 1;
 			getLatestMsg();
 		},
@@ -322,13 +287,13 @@ function colorMap (order, position) {
 
 entry.on('click', 'button', function (event) {
 	var target = $(event.target);
-	//console.log(page.data('action') != target.data('type'), page.data('action'), target.data('type'))
-	if (page[0].dataset.action != target.data('type')) {
+	//console.log(page.data('action') !== target.data('type'), page.data('action'), target.data('type'))
+	if (page[0].dataset.action !== target.data('type')) {
 		page.attr('data-action', target.data('type'));
 		message.text('').removeClass('show');
 	}
 	else {
-		if (target.data('type') != 'return') {
+		if (target.data('type') !== 'return') {
 			var form = $('.form-' + target.data('type'));
 			form.find('button').click();
 			/*
@@ -359,7 +324,7 @@ $('.form-access').on('submit', function (event) {
 	var formData = fetchForm(form);
 	$.ajax({
 		method: 'POST',
-		url: form.attr('action'),
+		url: form.attr('action').replace(/\{serverURL\}/, serverURL),
 		xhrFields: {
 			withCredentials: true
 		},
@@ -390,7 +355,7 @@ $('.form-create').on('submit', function (event) {
 	//console.log(formData)
 	$.ajax({
 		method: 'POST',
-		url: form.attr('action'),
+		url: form.attr('action').replace(/\{serverURL\}/, serverURL),
 		xhrFields: {
 			withCredentials: true
 		},
@@ -400,7 +365,7 @@ $('.form-create').on('submit', function (event) {
 			formData.host = user.uid;
 			$.ajax({
 				method: 'POST',
-				url: 'http://115.28.65.51:8080/change/',
+				url: serverURL + '/change/',
 				xhrFields: {
 					withCredentials: true
 				},
@@ -435,7 +400,7 @@ $('.form-enter').on('submit', function (event) {
 	var formData = fetchForm(form);
 	$.ajax({
 		method: 'POST',
-		url: form.attr('action'),
+		url: form.attr('action').replace(/\{serverURL\}/, serverURL),
 		xhrFields: {
 			withCredentials: true
 		},
@@ -460,12 +425,12 @@ CodeboxInput.on('keypress', function (event) {
 		var value = CodeboxInput.text().trim();
 		outputLine.clone().addClass('user').text(value).appendTo(CodeboxOutput);
 		CodeboxInput.text('');
-		if (value != '') {
+		if (value !== '') {
 			//if (/^(move(North|South|East|West)|putBomb|endTurn)/.test(value)){
 			//	if (/^(move(North|South|East|West)|putBomb|endTurn)\(\)$/.test(value)) {
 					$.ajax({
 						method: 'POST',
-						url: 'http://115.28.65.51:8080/action/',
+						url: serverURL + '/action/',
 						xhrFields: {
 							withCredentials: true
 						},
@@ -473,29 +438,26 @@ CodeboxInput.on('keypress', function (event) {
 							move: value
 						},
 						success: function(data) {
-							if (data.status != 1) return outputLine.clone().text('提交失败：' + getErrorMsg(data.status)).appendTo(CodeboxOutput);
+							if (data.status != 1) return outputLog('提交失败：' + getErrorMsg(data.status));
 							getLatestMsg();
-							//outputLine.clone().text(data.info.content).appendTo(CodeboxOutput);
+							//outputLog(data.info.content);
 						},
 						error: function (e) {
-							return outputLine.clone().text('HTTP Error ' + e.status + ': ' + e.statusText).appendTo(CodeboxOutput);
+							return outputLog('HTTP Error ' + e.status + ': ' + e.statusText);
 						},
 						dataType: 'json'
 					});
 			//	}
 			//}
 		}
-		//CodeboxOutput.
 	}
-});/*.on('paste', function (event) {
-	CodeboxInput.text(CodeboxInput.text());
-});*/
+});
 
 $('.button-start').on('click', function (event) {
 	if (uid == null) return;
 	$.ajax({
 		method: 'GET',
-		url: 'http://115.28.65.51:8080/start/',
+		url: serverURL + '/start/',
 		xhrFields: {
 			withCredentials: true
 		},
@@ -503,14 +465,14 @@ $('.button-start').on('click', function (event) {
 			host: uid
 		},
 		success: function(data) {
-			if (data.status != 1) return outputLine.clone().text('提交失败：' + getErrorMsg(data.status)).appendTo(CodeboxOutput);
-			outputLine.clone().text('您开始了游戏。').appendTo(CodeboxOutput);
+			if (data.status != 1) return outputLog('提交失败：' + getErrorMsg(data.status));
+			outputLog('您开始了游戏。');
 			gameStart();
 			getLatestMsg();
 			$('.button-start').hide();
 		},
 		error: function (e) {
-			return outputLine.clone().text('HTTP Error ' + e.status + ': ' + e.statusText).appendTo(CodeboxOutput);
+			return outputLog('HTTP Error ' + e.status + ': ' + e.statusText);
 		},
 		dataType: 'json'
 	});
@@ -520,7 +482,7 @@ $('.button-leave').on('click', function (event) {
 	if (uid == null) return;
 	confirm('您确定要离开房间么？') && $.ajax({
 		method: 'POST',
-		url: 'http://115.28.65.51:8080/leave/',
+		url: serverURL + '/leave/',
 		xhrFields: {
 			withCredentials: true
 		},
@@ -528,13 +490,13 @@ $('.button-leave').on('click', function (event) {
 			host: uid
 		},
 		success: function(data) {
-			if (data.status != 1) return outputLine.clone().text('提交失败：' + getErrorMsg(data.status)).appendTo(CodeboxOutput);
+			if (data.status != 1) return outputLog('提交失败：' + getErrorMsg(data.status));
 			uid = null;
-			outputLine.clone().text('您已离开游戏！').appendTo(CodeboxOutput);
+			outputLog('您已离开游戏！');
 			page.removeClass('room-page').addClass('front-page');
 		},
 		error: function (e) {
-			return outputLine.clone().text('HTTP Error ' + e.status + ': ' + e.statusText).appendTo(CodeboxOutput);
+			return outputLog('HTTP Error ' + e.status + ': ' + e.statusText);
 		},
 		dataType: 'json'
 	});
@@ -545,7 +507,7 @@ if (document.cookie.indexOf('sessionid') > 0) {
 	page.removeClass('access-page').addClass('front-page');
 	$.ajax({
 		method: 'POST',
-		url: form.attr('action'),
+		url: form.attr('action').replace(/\{serverURL\}/, serverURL),
 		xhrFields: {
 			withCredentials: true
 		},
@@ -556,62 +518,6 @@ if (document.cookie.indexOf('sessionid') > 0) {
 	});
 }
 */
-
-/*
-var page = document.getElementsByClassName('page')[0];
-var entry = document.getElementsByClassName('entry')[0];
-var message = document.getElementsByClassName('message')[0];
-var input = document.getElementsByClassName('codebox-output-line')[0];
-
-entry.addEventListener('click', function (event) {
-	var target = event.target;
-	if (target.className.indexOf('button') < 0) return;
-	if (page.dataset.action != target.dataset.type) {
-		page.setAttribute('data-action', target.dataset.type);
-		message.textContent = '';
-		message.classList.remove('show');
-	}
-	else {
-		if (target.dataset.type != 'return') {
-			var form = document.getElementsByClassName('form-' + target.dataset.type)[0];
-			message.classList.add('show');
-			if ([].some.call(form.getElementsByTagName('input'), function(elem){
-				return !elem.value.trim();
-			})) return ((message.textContent = '请完整填写表单') && setTimeout(function(){
-				message.textContent = '';
-				message.classList.remove('show');
-			}, 2000));
-			var formData = new FormData(form);
-			var xhr = new XMLHttpRequest();
-			message.textContent = '正在提交数据......';
-			entry.classList.add('hide');
-			xhr.addEventListener('readystatechange', function(){
-				if (xhr.readyState === 4) {
-					if (xhr.status === 200) {
-						var data = JSON.parse(xhr.responseText);
-						if (data.status == 1) {
-							message.textContent = '创建成功！房间 ID：' + data.room_no;
-							setTimeout(function(){
-								page.classList.remove('front-page');
-								page.classList.add('room-page');
-								showRoom();
-							}, 2000);
-						}
-					}
-				}
-			});
-			xhr.open('POST', form.getAttribute('action'));
-			xhr.send(form);
-		}
-	}
-});
-
-input.addEventListener('keypress', function (event) {
-	if (event.keyCode === 13) {
-		var value = input.textContent.trim();
-
-	}
-});*/
 </script>
 </body>
 </html>
