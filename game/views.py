@@ -53,31 +53,34 @@ def game_start(request):
             host = uid
             room = Room.objects.get(host=host)
             members = room.members.split(';')
-            for i in members:
-                player = Player.objects.get(id=int(i))
-                player.status = "Gaming"
-                player.save()
-            game = room.game
-            game.start = True
-            game.turn = random.randint(0, room.num - 1)
-            game.times = 0
-            game.left = room.num
-            game.save()
+            if len(members) < 2:
+                status = "0"
+            else:
+                for i in members:
+                    player = Player.objects.get(id=int(i))
+                    player.status = "Gaming"
+                    player.save()
+                game = room.game
+                game.start = True
+                game.turn = random.randint(0, room.num - 1)
+                game.times = 0
+                game.left = room.num
+                game.save()
 
-            # Make the default position
-            position = ""
+                # Make the default position
+                position = ""
 
-            flag = False
-            for i in range(0, room.num):
-                x = random.randint(0, room.length - 1)
-                y = random.randint(0, room.length - 1)
-                if flag:
-                    position += ';'
-                flag = True
-                position += str(x) + ',' + str(y)
-                game.position = position
-            game.save()
-            status = "1"
+                flag = False
+                for i in range(0, room.num):
+                    x = random.randint(0, room.length - 1)
+                    y = random.randint(0, room.length - 1)
+                    if flag:
+                        position += ';'
+                    flag = True
+                    position += str(x) + ',' + str(y)
+                    game.position = position
+                game.save()
+                status = "1"
 
     response = HttpResponse(json.dumps({'status': status, 'info': info}))
     return response
@@ -91,15 +94,22 @@ def wait_start(request):
         if not (request.method == 'GET'):
             status = "3"
         else:
-            uid = request.session.get('uid')
-            info['uid'] = uid
-            player = Player.objects.get(id=int(uid))
-            room = Room.objects.get(host=player.where)
-            game = room.game
-            if game.start:
-                status = "1"
-            else:
-                status = "0"
+            try:
+                uid = request.session.get('uid')
+                if not uid:
+                    raise Player.DoesNotExist
+                info['uid'] = uid
+                player = Player.objects.get(id=int(uid))
+                room = Room.objects.get(host=player.where)
+                game = room.game
+                if game.start:
+                    status = "1"
+                else:
+                    status = "0"
+            except Player.DoesNotExist:
+                status = "4"
+            except Room.DoesNotExist:
+                status = "6"
     response = HttpResponse(json.dumps({'status': status, 'info': info}))
     return response
 
@@ -264,64 +274,69 @@ def query(request):
         if not (request.method == 'POST'):
             status = "2"
         else:
-            uid = request.session.get('uid')
-            player = Player.objects.get(id=int(uid))
-            room = Room.objects.get(host=player.where)
-            game = room.game
-            mid = int(request.POST.get('mid'))
-            seq = game.status.split(';')
-            info['uid'] = uid
-            info['name'] = Player.find_name(uid)
-            info['data'] = []
-            direction = (u'东', u'北', u'西', u'南')
-            for i in range(0, len(seq) - 1):
-                if i >= mid:
-                    xdata = {}
-                    ss = str(seq[i]).split(',')
-                    xdata['mid'] = ss[0]
-                    xdata['uid'] = ss[1]
-                    name = Player.find_name(int(ss[1]))
-                    selfs = (int(ss[1]) == int(uid))
-                    word = ""
-                    if ss[2] == "tL":
-                        if selfs:
-                            word += u" 您 向左转了身。(现在面向 " + direction[int(ss[3])]
-                        else:
-                            word += " " + name + u" 执行了一次操作"
-                    if ss[2] == "tR":
-                        if selfs:
-                            word += u" 您 向右转了身。(现在面向 " + direction[int(ss[3])]
-                        else:
-                            word += " " + name + u" 执行了一次操作"
-                    if ss[2] == "gF":
-                        if selfs:
-                            word += u" 您 向前走了一步(现在面向 " + direction[int(ss[3])]
-                        else:
-                            word += " " + name + u" 执行了一次操作"
-                    if ss[2] == "pB":
-                        if selfs:
-                            word += u" 您 安置了一个炸弹！请注意安全！(现在面向 " + direction[int(ss[3])]
-                        else:
-                            word += " " + name + u" 执行了一次操作"
-                    if ss[2] == "eT":
-                        if selfs:
-                            word += u" 您 提前结束了回合。(现在面向 " + direction[int(ss[3])]
-                        else:
-                            word += " " + name + u" 执行了一次操作"
-                    if ss[2] == "dD":
-                        if selfs:
-                            word += u" 您 被炸飞了desu。输掉了游戏。"
-                        else:
-                            word += " " + name + u"被人炸飞了。输掉了游戏。"
-                    xdata['content'] = word
-                    xdata['color'] = ss[3]
-                    info['data'].append(xdata)
-            info['position'] = str(game.position).split(';')
-            info['order_id'] = str(room.members).split(';')
-            info['order_name'] = []
-            for k in info['order_id']:
-                info['order_name'].append(Player.find_name(int(k)))
-            status = "1"
+            try:
+                uid = request.session.get('uid')
+                player = Player.objects.get(id=int(uid))
+                room = Room.objects.get(host=player.where)
+                game = room.game
+                mid = int(request.POST.get('mid'))
+                seq = game.status.split(';')
+                info['uid'] = uid
+                info['name'] = Player.find_name(uid)
+                info['data'] = []
+                direction = (u'东', u'北', u'西', u'南')
+                for i in range(0, len(seq) - 1):
+                    if i >= mid:
+                        xdata = {}
+                        ss = str(seq[i]).split(',')
+                        xdata['mid'] = ss[0]
+                        xdata['uid'] = ss[1]
+                        name = Player.find_name(int(ss[1]))
+                        selfs = (int(ss[1]) == int(uid))
+                        word = ""
+                        if ss[2] == "tL":
+                            if selfs:
+                                word += u" 您 向左转了身。(现在面向 " + direction[int(ss[3])]
+                            else:
+                                word += " " + name + u" 执行了一次操作"
+                        if ss[2] == "tR":
+                            if selfs:
+                                word += u" 您 向右转了身。(现在面向 " + direction[int(ss[3])]
+                            else:
+                                word += " " + name + u" 执行了一次操作"
+                        if ss[2] == "gF":
+                            if selfs:
+                                word += u" 您 向前走了一步(现在面向 " + direction[int(ss[3])]
+                            else:
+                                word += " " + name + u" 执行了一次操作"
+                        if ss[2] == "pB":
+                            if selfs:
+                                word += u" 您 安置了一个炸弹！请注意安全！(现在面向 " + direction[int(ss[3])]
+                            else:
+                                word += " " + name + u" 执行了一次操作"
+                        if ss[2] == "eT":
+                            if selfs:
+                                word += u" 您 提前结束了回合。(现在面向 " + direction[int(ss[3])]
+                            else:
+                                word += " " + name + u" 执行了一次操作"
+                        if ss[2] == "dD":
+                            if selfs:
+                                word += u" 您 被炸飞了desu。输掉了游戏。"
+                            else:
+                                word += " " + name + u"被人炸飞了。输掉了游戏。"
+                        xdata['content'] = word
+                        xdata['color'] = ss[3]
+                        info['data'].append(xdata)
+                info['position'] = str(game.position).split(';')
+                info['order_id'] = str(room.members).split(';')
+                info['order_name'] = []
+                for k in info['order_id']:
+                    info['order_name'].append(Player.find_name(int(k)))
+                status = "1"
+            except Player.DoesNotExist:
+                status = "4"
+            except Room.DoesNotExist:
+                status = "5"
     response = HttpResponse(json.dumps({'status': status, 'info': info}))
     return response
 

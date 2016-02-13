@@ -19,13 +19,14 @@ def allot(request):
         status = "2"
     else:
         if 'uid' in request.session:
-            player = Player.objects.get(id=int(request.session.get('uid')))
-        else:
-            player = Player()
-            player.name = request.POST.get('name')
-            player.save()
+            # player = Player.objects.get(id=int(request.session.get('uid')))
+            pass
+
+        player = Player()
+        player.name = request.POST.get('name')
+        player.save()
         request.session['uid'] = player.id
-        # request.session.set_expiry(0)
+
         info = {'uid': player.id, 'name': player.name, 'session': request.session.get_expiry_age()}
         status = "1"
     response = HttpResponse(json.dumps({'status': status, 'info': info}))
@@ -64,17 +65,22 @@ def room(request):
         if not (request.method == 'POST'):
             status = '2'
         else:
-            host = request.POST.get('host')
-            info = {}
-            item = Room.objects.get(host=host)
-            info['name'] = Player.find_name(item.host)
-            info['host'] = item.host
-            info['num'] = item.num
-            info['length'] = item.length
-            info['capacity'] = item.capacity
-            info['energy'] = item.energy
-            info['players'] = item.members.split(';')
-            status = "1"
+            try:
+                host = request.POST.get('host')
+                if not host:
+                    raise Room.DoesNotExist
+                info = {}
+                item = Room.objects.get(host=int(host))
+                info['name'] = Player.find_name(item.host)
+                info['host'] = item.host
+                info['num'] = item.num
+                info['length'] = item.length
+                info['capacity'] = item.capacity
+                info['energy'] = item.energy
+                info['players'] = item.members.split(';')
+                status = "1"
+            except Room.DoesNotExist:
+                status = "5"
     response = HttpResponse(json.dumps({'status': status, 'info': info}))
     return response
 
@@ -84,21 +90,26 @@ def host_room(request):
     if not ('uid' in request.session):
         status = "4"
     else:
-        uid = request.session.get('uid')
-        player = Player.objects.get(id=uid)
-        if not (player.status == "Idle"):
-            status = "5"
-        else:
-            item = Room()
-            item.host = uid
-            item.members = item.host
-            item.game = game_init()
-            item.save()
-            player.status = "Host"
-            player.where = uid
-            player.face = random.randint(0, 3)
-            player.save()
-            status = "1"
+        uid = int(request.session.get('uid'))
+        try:
+            player = Player.objects.get(id=uid)
+            if not (player.status == "Idle"):
+                status = "5"
+            else:
+                item = Room()
+                item.host = uid
+                item.members = item.host
+                item.game = game_init()
+                item.save()
+                player.status = "Host"
+                player.where = uid
+                player.face = random.randint(0, 3)
+                player.save()
+                status = "1"
+
+        except Player.DoesNotExist:
+            status = "4"
+
     response = HttpResponse(json.dumps({'status': status, 'info': info}))
     return response
 
@@ -111,28 +122,33 @@ def enter_room(request):
         if not (request.method == 'POST'):
             status = "2"
         else:
-            uid = request.session.get('uid')
-            player = Player.objects.get(id=uid)
-            if not (player.status == "Idle"):
-                status = "5"
-            else:
-                host = request.POST.get('host')
-                item = Room.objects.get(host=host)
-                flag = True
-                if item:
-                    if item.capacity > item.num:
-                        item.num += 1
-                        item.members += ";" + str(uid)
-                        item.save()
+            try:
+                uid = request.session.get('uid')
+                player = Player.objects.get(id=uid)
+                if not (player.status == "Idle"):
+                    status = "5"
+                else:
+                    host = request.POST.get('host')
+                    item = Room.objects.get(host=host)
+                    flag = True
+                    if item:
+                        if item.capacity > item.num:
+                            item.num += 1
+                            item.members += ";" + str(uid)
+                            item.save()
 
-                        player.status = "Indoor"
-                        player.where = host
-                        player.face = random.randint(0, 3)
-                        player.save()
+                            player.status = "Indoor"
+                            player.where = host
+                            player.face = random.randint(0, 3)
+                            player.save()
+                            flag = False
+                    if flag:
+                        status = "6"
+                    else:
                         status = "1"
-                        flag = False
-                if flag:
-                    status = "6"
+
+            except Player.DoesNotExist:
+                status = "4"
     response = HttpResponse(json.dumps({'status': status, 'info': info}))
     return response
 
