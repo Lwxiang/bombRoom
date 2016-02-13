@@ -171,7 +171,7 @@ def action(request):
                     raise Game.DoesNotExist
                 game.no += 1
                 members = room.members.split(';')
-                return HttpResponse("%d,%s,%s" % (game.turn, members[game.turn], uid))
+                return HttpResponse(str(type(members[game.turn])), str(type(uid)))
                 if members[game.turn] != uid:
                     status = "0"
                 else:
