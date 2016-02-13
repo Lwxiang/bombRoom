@@ -4,7 +4,7 @@ from models import Player, Room
 
 
 class PlayerAdmin(admin.ModelAdmin):
-    list_display = ('name', 'status', 'where', 'face', 'alive')
+    list_display = ('id', 'name', 'status', 'where', 'face', 'alive')
 
 
 class RoomAdmin(admin.ModelAdmin):
