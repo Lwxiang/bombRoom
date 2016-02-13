@@ -212,6 +212,11 @@ def change_room(request):
                 item.length = int(request.POST.get('length'))
                 item.energy = int(request.POST.get('energy'))
                 item.save()
+                game = item.game
+                game.bomb = '0' * item.length * item.length
+                game.wall = '0' * item.length * item.length
+                game.save()
+                item.save()
                 status = "1"
     response = HttpResponse(json.dumps({'status': status, 'info': info}))
     return response

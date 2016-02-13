@@ -40,6 +40,39 @@ def game_over(host):
     room.delete()
 
 
+def process_status(no, uid, act, face, colour):
+    status = "%s,%s,%s,%s,%s;" % (str(no), str(uid), str(act), str(face), str(colour))
+    return status
+
+
+def get_position(uid, room, members, game):
+    z = 0
+    for i in range(0, room.num):
+        if int(members[i]) == int(uid):
+            z = i
+            break
+    item = game.position.split(';')
+    x = int(str(item[z]).split(',')[0])
+    y = int(str(item[z]).split(',')[1])
+    return x, y
+
+
+def set_position(uid, room, members, game, x, y):
+    z = 0
+    for i in range(0, room.num):
+        if int(members[i]) == int(uid):
+            z = i
+            break
+    item = game.position.split(';')
+    item[z] = str(x) + ',' + str(y)
+    game.position = ""
+    for i in range(0, room.num):
+        if i > 0:
+            game.position += ";"
+        game.position += str(item[i])
+    game.save()
+
+
 def game_start(request):
     info = {}
     if not ('uid' in request.session):
@@ -72,12 +105,17 @@ def game_start(request):
 
                 flag = False
                 for i in range(0, room.num):
-                    x = random.randint(0, room.length - 1)
-                    y = random.randint(0, room.length - 1)
+                    piece = ""
+                    while True:
+                        x = random.randint(0, room.length - 1)
+                        y = random.randint(0, room.length - 1)
+                        piece = str(x) + ',' + str(y)
+                        if position.find(piece) == -1:
+                            break
                     if flag:
                         position += ';'
                     flag = True
-                    position += str(x) + ',' + str(y)
+                    position += piece
                     game.position = position
                 game.save()
                 status = "1"
@@ -122,120 +160,104 @@ def action(request):
         if not (request.method == 'POST'):
             status = "2"
         else:
-            uid = request.session.get('uid')
-            player = Player.objects.get(id=int(uid))
-            room = Room.objects.get(host=player.where)
-            game = room.game
-            game.no += 1
-            members = room.members.split(';')
-            if members[game.turn] != str(uid):
-                status = "5"
-            else:
-                move = request.POST.get('move')
-                flag = False
-                if move == "turnLeft()":
-                    player.face = (player.face + 1) % 4
-                    player.save()
-                    game.status += str(game.no) + ',' + str(uid) + ',' + "tL" + ',' + str(player.face) + ',' + color[int(game.turn)] + ";"
-                    game.save()
-                    flag = True
-                if move == "turnRight()":
-                    player.face = (player.face + 4 - 1) % 4
-                    player.save()
-                    game.status += str(game.no) + ',' + str(uid) + ',' + "tR" + ',' + str(player.face) + ',' + color[int(game.turn)] + ";"
-                    game.save()
-                    flag = True
-                if move == "goForward()":
-                    game.status += str(game.no) + ',' + str(uid) + ',' + "gF" + ',' + str(player.face) + ',' + color[int(game.turn)] + ";"
-                    game.save()
-                    z = 0
-                    for i in range(0, room.num):
-                        if int(members[i]) == int(uid):
-                            z = i
-                            break
-                    item = game.position.split(';')
-                    x = int(str(item[z]).split(',')[0])
-                    y = int(str(item[z]).split(',')[1])
-                    if player.face == 0:
-                        x = (x + 1) % room.length
-                    if player.face == 1:
-                        y = (y + 1) % room.length
-                    if player.face == 2:
-                        x = (x - 1 + room.length) % room.length
-                    if player.face == 3:
-                        y = (y - 1 + room.length) % room.length
-                    item[z] = str(x) + ',' + str(y)
-                    game.position = ""
-                    for i in range(0, room.num):
-                        if i > 0:
-                            game.position += ";"
-                        game.position += str(item[i])
-                    game.save()
-                    flag = True
-                if move == "putBomb()":
-                    game.status += str(game.no) + ',' + str(uid) + ',' + "pB" + ',' + str(player.face) + ',' + color[int(game.turn)] + ";"
-                    game.save()
-                    z = 0
-                    for i in range(0, room.num):
-                        if members[i] == uid:
-                            z = i
-                            break
-                    item = game.position.split(';')
-                    x = int(str(item[z]).split(',')[0])
-                    y = int(str(item[z]).split(',')[1])
-                    bomb = game.bomb
-                    get = bomb[0: x * room.length + y]
-                    get += '1'
-                    if x == (room.length - 1) and y == (room.length - 1):
-                        get += ""
-                    else:
-                        get += bomb[x * room.length + y + 1: room.length * room.length]
-                    game.bomb = get
-                    game.save()
-                    flag = True
-                if move == "endTurn()":
-                    game.status += str(game.no) + ',' + str(uid) + ',' + "eT" + ',' + str(player.face) + ',' + color[int(game.turn)] + ";"
-                    game.times = room.energy
-                    game.save()
-                    flag = True
-                if flag:
-                    game.times += 1
-                    game.save()
-                    if game.times >= room.energy:
-                        z = 0
-                        for i in range(0, room.num):
-                            if members[i] == uid:
-                                z = i
-                                break
-                        item = game.position.split(';')
-                        x = int(str(item[z]).split(',')[0])
-                        y = int(str(item[z]).split(',')[1])
-                        bomb = game.bomb
-                        if bomb[x * room.length + y] == '1':
-                            get = bomb[0: x * room.length + y]
-                            get += '0'
-                            if x == (room.length - 1) and y == (room.length - 1):
-                                get += ""
-                            else:
-                                get += bomb[x * room.length + y + 1: room.length * room.length]
-                            game.no += 1
-                            game.status += str(game.no) + ',' + str(uid) + ',' + "dD" + ',' + color[int(game.turn)] + ";"
-                            game.left -= 1
-                            game.save()
-                            player.alive = False
-                            player.save()
-                        while True:
-                            game.turn = (game.turn + 1) % room.num
-                            player = Player.objects.get(id=int(members[game.turn]))
-                            if player.alive:
-                                break
-                        game.times = 0
-                        game.save()
-                    status = "1"
+            try:
+                uid = request.session.get('uid')
+                if not uid:
+                    raise Player.DoesNotExist
+                player = Player.objects.get(id=int(uid))
+                room = Room.objects.get(host=player.where)
+                game = room.game
+                if not game:
+                    raise Game.DoesNotExist
+                game.no += 1
+                members = room.members.split(';')
+                if members[game.turn] != uid:
+                    status = "5"
                 else:
-                    game.no -= 1
-                    game.save()
-                    status = "0"
+                    move = request.POST.get('move')
+                    flag = False
+                    if move == "turnLeft()":
+                        player.face = (player.face + 1) % 4
+                        player.save()
+                        game.status += process_status(game.no, uid, "tL", player.face, color[game.turn])
+                        game.save()
+                        flag = True
+                    if move == "turnRight()":
+                        player.face = (player.face + 4 - 1) % 4
+                        player.save()
+                        game.status += process_status(game.no, uid, "tR", player.face, color[game.turn])
+                        game.save()
+                        flag = True
+                    if move == "goForward()":
+                        game.status += process_status(game.no, uid, "gF", player.face, color[game.turn])
+                        game.save()
+                        x, y = get_position(uid, room, members, game)
+                        if player.face == 0:
+                            x = (x + 1) % room.length
+                        if player.face == 1:
+                            y = (y + 1) % room.length
+                        if player.face == 2:
+                            x = (x - 1 + room.length) % room.length
+                        if player.face == 3:
+                            y = (y - 1 + room.length) % room.length
+                        set_position(uid, room, members, game, x, y)
+                        flag = True
+                    if move == "putBomb()":
+                        game.status += process_status(game.no, uid, "pB", player.face, color[game.turn])
+                        game.save()
+                        x, y = get_position(uid, room, members, game)
+                        bomb = game.bomb
+                        get = bomb[0: x * room.length + y]
+                        get += '1'
+                        if x == (room.length - 1) and y == (room.length - 1):
+                            get += ""
+                        else:
+                            get += bomb[x * room.length + y + 1: room.length * room.length]
+                        game.bomb = get
+                        game.save()
+                        flag = True
+                    if move == "endTurn()":
+                        game.status += process_status(game.no, uid, "eT", player.face, color[game.turn])
+                        game.times = room.energy
+                        game.save()
+                        flag = True
+                    if flag:
+                        game.times += 1
+                        game.save()
+                        if game.times >= room.energy:
+                            x, y = get_position(uid, room, members, game)
+                            bomb = game.bomb
+                            if bomb[x * room.length + y] == '1':
+                                get = bomb[0: x * room.length + y]
+                                get += '0'
+                                if x == (room.length - 1) and y == (room.length - 1):
+                                    get += ""
+                                else:
+                                    get += bomb[x * room.length + y + 1: room.length * room.length]
+                                game.no += 1
+                                game.status += process_status(game.no, uid, "dD", player.face, color[game.turn])
+                                game.left -= 1
+                                game.save()
+                                player.alive = False
+                                player.save()
+                            while True:
+                                game.turn = (game.turn + 1) % room.num
+                                player = Player.objects.get(id=int(members[game.turn]))
+                                if player.alive:
+                                    break
+                            game.times = 0
+                            game.save()
+                        status = "1"
+                    else:
+                        game.no -= 1
+                        game.save()
+                        status = "0"
+            except Player.DoesNotExist:
+                status = "4"
+            except Room.DoesNotExist:
+                status = "5"
+            except Game.DoesNotExist:
+                status = "0"
     response = HttpResponse(json.dumps({'status': status, 'info': info}))
     return response
 
