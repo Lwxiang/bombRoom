@@ -172,7 +172,7 @@ def action(request):
                 game.no += 1
                 members = room.members.split(';')
                 if members[game.turn] != uid:
-                    status = "5"
+                    status = "0"
                 else:
                     move = request.POST.get('move')
                     flag = False

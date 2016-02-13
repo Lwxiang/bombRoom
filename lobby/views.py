@@ -90,19 +90,21 @@ def host_room(request):
     if not ('uid' in request.session):
         status = "4"
     else:
-        uid = int(request.session.get('uid'))
         try:
-            player = Player.objects.get(id=uid)
+            uid = request.session.get('uid')
+            if not uid:
+                raise Player.DoesNotExist
+            player = Player.objects.get(id=int(uid))
             if not (player.status == "Idle"):
                 status = "5"
             else:
                 item = Room()
-                item.host = uid
+                item.host = int(uid)
                 item.members = item.host
                 item.game = game_init()
                 item.save()
                 player.status = "Host"
-                player.where = uid
+                player.where = int(uid)
                 player.face = random.randint(0, 3)
                 player.save()
                 status = "1"
