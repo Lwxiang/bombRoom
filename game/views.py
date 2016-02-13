@@ -171,7 +171,7 @@ def action(request):
                     raise Game.DoesNotExist
                 game.no += 1
                 members = room.members.split(';')
-                if int(members[game.turn]) != uid:
+                if members[game.turn] != str(uid):
                     status = "0"
                 else:
                     move = request.POST.get('move')
