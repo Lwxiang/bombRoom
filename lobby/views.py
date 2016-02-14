@@ -71,6 +71,8 @@ def room(request):
                     raise Room.DoesNotExist
                 info = {}
                 item = Room.objects.get(host=int(host))
+                game = item.game
+                info['start'] = game.start
                 info['name'] = Player.find_name(item.host)
                 info['host'] = item.host
                 info['num'] = item.num
