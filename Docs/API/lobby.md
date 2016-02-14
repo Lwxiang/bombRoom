@@ -193,6 +193,7 @@ HTTP请求方式:```POST```
 
 |字段|说明|
 |---|---|
+|start|是否已经开始|
 |host|房间id,也就是房主的id|
 |name|房主的名字|
 |capacity|最大参与人数|
@@ -203,7 +204,7 @@ HTTP请求方式:```POST```
 
 JSON示例:
 
-{"status": "1", "info": {"capacity": 5, "name": "\u6d6a\u5473\u9c9c", "energy": 3, "host": 1, "players": ["1", "2"], "length": 4, "num": 2}}
+{"status": "1", "info": {"start": False, "capacity": 5, "name": "\u6d6a\u5473\u9c9c", "energy": 3, "host": 1, "players": ["1", "2"], "length": 4, "num": 2}}
 
 ---
 
