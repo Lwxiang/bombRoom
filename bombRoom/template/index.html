@@ -287,29 +287,28 @@ function colorMap (order, position) {
 
 entry.on('click', 'button', function (event) {
 	var target = $(event.target);
-	//console.log(page.data('action') !== target.data('type'), page.data('action'), target.data('type'))
-	if (page[0].dataset.action !== target.data('type')) {
-		page.attr('data-action', target.data('type'));
+	var type = target.data('type');
+	if (page[0].dataset.action !== type) {
+		page.attr('data-action', type);
+		$('.form').each(function(){
+			var that = $(this);
+			if (that.hasClass('form-' + type)) {
+				that.find('input').each(function(){
+					$(this).removeAttr('tabIndex');
+				}
+			}
+			else {
+				that.find('input').each(function(){
+					$(this).attr('tabIndex', '-1');
+				}
+			}
+		})
 		message.text('').removeClass('show');
 	}
 	else {
-		if (target.data('type') !== 'return') {
-			var form = $('.form-' + target.data('type'));
+		if (type !== 'return') {
+			var form = $('.form-' + type);
 			form.find('button').click();
-			/*
-			message.addClass('show');
-			if ([].some.call(form.children('input'), function(elem){
-				return !elem.value.trim();
-			})) return ((message.text('请完整填写表单')) && setTimeout(function(){
-				message.text('').removeClass('show');
-			}, 2000));
-			var formData = new FormData(form[0]);
-			message.text('正在提交数据......');
-			entry.addClass('hide');
-			$.post('http://121.43.228.141/host/', form, function(data){
-				console.log(data);
-			}, 'json')
-			*/
 		}
 	}
 });
@@ -426,29 +425,25 @@ CodeboxInput.on('keypress', function (event) {
 		outputLine.clone().addClass('user').text(value).appendTo(CodeboxOutput);
 		CodeboxInput.text('');
 		if (value !== '') {
-			//if (/^(move(North|South|East|West)|putBomb|endTurn)/.test(value)){
-			//	if (/^(move(North|South|East|West)|putBomb|endTurn)\(\)$/.test(value)) {
-					$.ajax({
-						method: 'POST',
-						url: serverURL + '/action/',
-						xhrFields: {
-							withCredentials: true
-						},
-						data: {
-							move: value
-						},
-						success: function(data) {
-							if (data.status != 1) return outputLog('提交失败：' + getErrorMsg(data.status));
-							getLatestMsg();
-							//outputLog(data.info.content);
-						},
-						error: function (e) {
-							return outputLog('HTTP Error ' + e.status + ': ' + e.statusText);
-						},
-						dataType: 'json'
-					});
-			//	}
-			//}
+			$.ajax({
+				method: 'POST',
+				url: serverURL + '/action/',
+				xhrFields: {
+					withCredentials: true
+				},
+				data: {
+					move: value
+				},
+				success: function(data) {
+					if (data.status != 1) return outputLog('提交失败：' + getErrorMsg(data.status));
+					getLatestMsg();
+					//outputLog(data.info.content);
+				},
+				error: function (e) {
+					return outputLog('HTTP Error ' + e.status + ': ' + e.statusText);
+				},
+				dataType: 'json'
+			});
 		}
 	}
 });
@@ -501,23 +496,6 @@ $('.button-leave').on('click', function (event) {
 		dataType: 'json'
 	});
 });
-/*
-// httponly, 此判断无效
-if (document.cookie.indexOf('sessionid') > 0) {
-	page.removeClass('access-page').addClass('front-page');
-	$.ajax({
-		method: 'POST',
-		url: form.attr('action').replace(/\{serverURL\}/, serverURL),
-		xhrFields: {
-			withCredentials: true
-		},
-		success: function(data) {
-			user = data.info;
-		},
-		dataType: 'json'
-	});
-}
-*/
 </script>
 </body>
 </html>
