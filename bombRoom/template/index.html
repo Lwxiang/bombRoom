@@ -295,14 +295,14 @@ entry.on('click', 'button', function (event) {
 			if (that.hasClass('form-' + type)) {
 				that.find('input').each(function(){
 					$(this).removeAttr('tabIndex');
-				}
+				});
 			}
 			else {
 				that.find('input').each(function(){
 					$(this).attr('tabIndex', '-1');
-				}
+				});
 			}
-		})
+		});
 		message.text('').removeClass('show');
 	}
 	else {
