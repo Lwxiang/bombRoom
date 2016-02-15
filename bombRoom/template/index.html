@@ -140,7 +140,7 @@ function showRoom (id) {
 			uid = id;
 			$('.map').html(getMapString(data.info.length));
 			outputLog('欢迎来到 BOMB ROOM！');
-			outputLog('可用指令：turnLeft() 向左转<br>　　　　　turnRight() 向右转<br>　　　　　goForward() 向前走<br>　　　　　putBomb() 放下炸弹<br>　　　　　endTurn() 提前结束此回合', 1);
+			outputLog('可用指令：<code>turnLeft()</code> 向左转<br>　　　　　<code>turnRight()</code> 向右转<br>　　　　　<code>goForward()</code> 向前走<br>　　　　　<code>putBomb()</code> 放下炸弹<br>　　　　　<code>endTurn()</code> 提前结束此回合', 1);
 			outputLog('BOMB ROOM #' + id + '　房主：' + data.info.name + '　指令上限：' + data.info.energy + '　用户上限：' + data.info.capacity /*+ '　用户列表：' + data.info.players.join(', ') */+ ' (' + data.info.num + '/' + data.info.capacity +')');
 			getLatestMsg();
 		},
@@ -422,7 +422,7 @@ CodeboxInput.on('keypress', function (event) {
 	// CodeboxInput.text(CodeboxInput.text()); // 去除 HTML 标签
 	if (event.keyCode === 13) {
 		var value = CodeboxInput.text().trim();
-		outputLine.clone().addClass('user').text(value).appendTo(CodeboxOutput);
+		outputLine.clone().addClass('user').html('<code>' + value + '</code>').appendTo(CodeboxOutput);
 		CodeboxInput.text('');
 		if (value !== '') {
 			$.ajax({

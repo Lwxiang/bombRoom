@@ -361,6 +361,7 @@ body, input, textarea, select, button {
 	bottom: 0;
 	height: 20px;
 	margin: 0;
+	font-family: monospace;
 }
 
 .codebox-input::-webkit-selection {
