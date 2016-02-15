@@ -114,9 +114,9 @@ function fetchForm ($form) {
 	return data;
 }
 
-function outputLog (log, plain) {
+function outputLog (log, html) {
 	var curLine = outputLine.clone();
-	if (plain) curLine.text(log);
+	if (html) curLine.text(log);
 	else curLine.html(log);
 	curLine.appendTo(CodeboxOutput);
 }
