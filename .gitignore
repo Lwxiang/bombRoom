@@ -3,3 +3,4 @@
 .idea/*
 db.sqlite3
 *.sublime-*
+bombRoom/template/test.html
