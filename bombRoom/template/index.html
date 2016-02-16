@@ -116,7 +116,7 @@ function fetchForm ($form) {
 
 function outputLog (log, html) {
 	var curLine = outputLine.clone();
-	if (html) curLine.text(log);
+	if (!html) curLine.text(log);
 	else curLine.html(log);
 	curLine.appendTo(CodeboxOutput);
 }
@@ -422,7 +422,7 @@ CodeboxInput.on('keypress', function (event) {
 	// CodeboxInput.text(CodeboxInput.text()); // 去除 HTML 标签
 	if (event.keyCode === 13) {
 		var value = CodeboxInput.text().trim();
-		outputLine.clone().addClass('user').html('<code>' + value + '</code>').appendTo(CodeboxOutput);
+		outputLog('<code>' + value.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</code>', 1);
 		CodeboxInput.text('');
 		if (value !== '') {
 			$.ajax({
