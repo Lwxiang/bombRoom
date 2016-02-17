@@ -8,7 +8,7 @@ from game.views import *
 admin.autodiscover()
 
 urlpatterns = patterns('',
-    url(r'^index/$', index),
+    url(r'^$', index),
     url(r'^allot/$', allot),
     url(r'^hall/$', hall),
     url(r'^host/$', host_room),
