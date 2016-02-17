@@ -231,7 +231,7 @@ def restart_server(request):
     if request.method == "POST":
         import os, sys
         url = os.path.dirname(sys.path[0])
-        os.system(url + "/restart.sh")
+        os.system(url + "/bombRoom/restart.sh")
         response = 'ok'
     return HttpResponse(response)
 
