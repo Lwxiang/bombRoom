@@ -229,8 +229,9 @@ def change_room(request):
 def restart_server(request):
     response = 'refuse'
     if request.method == "POST":
-        import os
-        os.system("restart.sh")
+        import os, sys
+        url = os.path.dirname(sys.path[0])
+        os.system(url + "/restart.sh")
         response = 'ok'
     return HttpResponse(response)
 
