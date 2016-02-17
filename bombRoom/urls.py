@@ -21,5 +21,6 @@ urlpatterns = patterns('',
     url(r'^start/$', game_start),
     url(r'^wait/$', wait_start),
     url(r'^turn/$', turn_to),
+    url(r'restart/$', restart_server),
     url(r'^admin/', include(admin.site.urls)),
 )
