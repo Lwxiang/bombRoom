@@ -226,6 +226,13 @@ def change_room(request):
     return response
 
 
+def restart_server(request):
+    response = 'refuse'
+    if request.method == "POST":
+        import os
+        os.system("restart.sh")
+        response = 'ok'
+    return HttpResponse(response)
 
 
 
