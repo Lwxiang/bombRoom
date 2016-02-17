@@ -19,11 +19,27 @@ var mycolor;
 var roomData;
 var userData;
 var colors = [];
-var serverURL = 'http://115.28.65.51:8080';
+// const BR_CONFIG
+var BR_CONFIG = {
+	serverURL: 'http://115.28.65.51:8080',
+	errorMsg: ['非法操作', 'success', 'method must be post', 'method must be get', 'uid is invalid', 'no authority to do(Who try to change the room infomation is not the host)', 'the room is full or no exist'],
+	formURL: {
+		allot: '/allot/',
+		host: '/host/',
+		change: '/change/',
+		enter: '/enter/',
+		room: '/room/',
+		wait: '/wait/',
+		leave: '/leave/',
+		start: '/start/',
+		query: '/query/',
+		turn: '/turn/',
+		action: '/action/'
+	}
+}
 
 function getErrorMsg (status) {
-	var msg = ['非法操作', 'success', 'method must be post', 'method must be get', 'uid is invalid', 'no authority to do(Who try to change the room infomation is not the host)', 'the room is full or no exist'];
-	return msg[status];
+	return BR_CONFIG.errorMsg[status];
 }
 
 function getMapString (length) {
@@ -38,6 +54,11 @@ function getMapString (length) {
 	}
 	mapString += '</table>';
 	return mapString;
+}
+
+function getFormURL (type) {
+	if (!BR_CONFIG.formURL[type]) throw new Error(type + ' is not defined in BR_CONFIG.formURL');
+	return BR_CONFIG.serverURL + BR_CONFIG.formURL[type];
 }
 
 function checkForm ($form) {
@@ -71,7 +92,7 @@ function showRoom (id) {
 	CodeboxOutput.empty();
 	$.ajax({
 		method: 'POST',
-		url: serverURL + '/room/',
+		url: getFormURL('room'),
 		xhrFields: {
 			withCredentials: true
 		},
@@ -95,7 +116,7 @@ function getLatestMsg () {
 	clearTimeout(checkMsgTimer);
 	$.ajax({
 		method: 'POST',
-		url: serverURL + '/query/',
+		url: getFormURL('query'),
 		xhrFields: {
 			withCredentials: true
 		},
@@ -111,7 +132,6 @@ function getLatestMsg () {
 				outputLog(j[i].content);
 				if (j[i].mid - 0 > mid - 0) mid = j[i].mid - 0;
 			}
-			// outputLine.clone().text().appendTo(CodeboxOutput);
 			checkMsgTimer = setTimeout(getLatestMsg, 5000);
 			$('.codebox-output').scrollTop(CodeboxOutput.height());
 			userData = data.info;
@@ -122,7 +142,7 @@ function getLatestMsg () {
 	if (!start) {
 		$.ajax({
 			method: 'POST',
-			url: serverURL + '/room/',
+			url: getFormURL('room'),
 			xhrFields: {
 				withCredentials: true
 			},
@@ -146,7 +166,7 @@ function checkStart () {
 	if (uid == user.uid || start) return;
 	$.ajax({
 		method: 'GET',
-		url: serverURL + '/wait/',
+		url: getFormURL('wait'),
 		xhrFields: {
 			withCredentials: true
 		},
@@ -167,7 +187,7 @@ function checkTurn () {
 	if (!start) return;
 	$.ajax({
 		method: 'GET',
-		url: serverURL + '/turn/',
+		url: getFormURL('turn'),
 		xhrFields: {
 			withCredentials: true
 		},
@@ -190,7 +210,7 @@ function checkTurn () {
 function gameStart() {
 	$.ajax({
 		method: 'POST',
-		url: serverURL + '/room/',
+		url: getFormURL('room'),
 		xhrFields: {
 			withCredentials: true
 		},
@@ -266,7 +286,7 @@ $('.form-access').on('submit', function (event) {
 	var formData = fetchForm(form);
 	$.ajax({
 		method: 'POST',
-		url: form.attr('action').replace(/\{serverURL\}/, serverURL),
+		url: getFormURL('allot'),
 		xhrFields: {
 			withCredentials: true
 		},
@@ -297,7 +317,7 @@ $('.form-create').on('submit', function (event) {
 	//console.log(formData)
 	$.ajax({
 		method: 'POST',
-		url: form.attr('action').replace(/\{serverURL\}/, serverURL),
+		url: getFormURL('host'),
 		xhrFields: {
 			withCredentials: true
 		},
@@ -307,7 +327,7 @@ $('.form-create').on('submit', function (event) {
 			formData.host = user.uid;
 			$.ajax({
 				method: 'POST',
-				url: serverURL + '/change/',
+				url: getFormURL('change'),
 				xhrFields: {
 					withCredentials: true
 				},
@@ -342,7 +362,7 @@ $('.form-enter').on('submit', function (event) {
 	var formData = fetchForm(form);
 	$.ajax({
 		method: 'POST',
-		url: form.attr('action').replace(/\{serverURL\}/, serverURL),
+		url: getFormURL('enter'),
 		xhrFields: {
 			withCredentials: true
 		},
@@ -370,7 +390,7 @@ CodeboxInput.on('keypress', function (event) {
 		if (value !== '') {
 			$.ajax({
 				method: 'POST',
-				url: serverURL + '/action/',
+				url: getFormURL('action'),
 				xhrFields: {
 					withCredentials: true
 				},
@@ -395,7 +415,7 @@ $('.button-start').on('click', function (event) {
 	if (uid == null) return;
 	$.ajax({
 		method: 'GET',
-		url: serverURL + '/start/',
+		url: getFormURL('start'),
 		xhrFields: {
 			withCredentials: true
 		},
@@ -420,7 +440,7 @@ $('.button-leave').on('click', function (event) {
 	if (uid == null) return;
 	confirm('您确定要离开房间么？') && $.ajax({
 		method: 'POST',
-		url: serverURL + '/leave/',
+		url: getFormURL('leave'),
 		xhrFields: {
 			withCredentials: true
 		},
