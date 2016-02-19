@@ -22,7 +22,7 @@ var colors = [];
 var serverURL = 'http://115.28.65.51:8080';
 
 function getErrorMsg (status) {
-	var msg = ['非法操作', 'success', 'method must be post', 'method must be get', 'uid is invalid', 'no authority to do(Who try to change the room infomation is not the host)', 'the room is full or no exist'];
+	var msg = ['未知非法操作', 'success', 'method must be post', 'method must be get', 'uid is invalid', 'no authority to do', '房间已满', '房间不存在或游戏已经开始', '还没轮到您的回合', '指令有误,请重新输入'];
 	return msg[status];
 }
 
