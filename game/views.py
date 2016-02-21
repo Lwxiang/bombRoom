@@ -328,7 +328,7 @@ def query(request):
                                 word += " " + name + u" 执行了一次操作"
                         if ss[2] == "gF":
                             if selfs:
-                                word += u" 您 向前走了一步(现在面向 " + direction[int(ss[3])]
+                                word += u" 您 向前走了一步。 (现在面向 " + direction[int(ss[3])]
                             else:
                                 word += " " + name + u" 执行了一次操作"
                         if ss[2] == "pB":

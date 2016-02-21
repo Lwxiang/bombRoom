@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from django.shortcuts import render_to_response
 
 from lobby.models import Player, Room
-from game.views import game_init
+from game.views import game_init, color
 
 
 def index(request):
@@ -79,7 +79,9 @@ def room(request):
                 info['length'] = item.length
                 info['capacity'] = item.capacity
                 info['energy'] = item.energy
-                info['players'] = item.members.split(';')
+                info['ids'] = item.members.split(';')
+                info['players'] = item.names.split(';')
+                info['colors'] = item.colors.split(';')
                 status = "1"
             except Room.DoesNotExist:
                 status = "5"
@@ -103,6 +105,8 @@ def host_room(request):
                 item = Room()
                 item.host = int(uid)
                 item.members = item.host
+                item.names = player.name
+                item.color = color[0]
                 item.game = game_init()
                 item.save()
                 player.status = "Host"
@@ -139,6 +143,8 @@ def enter_room(request):
                         if item.capacity > item.num:
                             item.num += 1
                             item.members += ";" + str(uid)
+                            item.names += ";" + player.name
+                            item.colors = ";".join(color[:item.num])
                             item.save()
 
                             player.status = "Indoor"
@@ -168,20 +174,30 @@ def leave_room(request):
             uid = request.session.get('uid')
             player = Player.objects.get(id=uid)
             if not (player.status == "Indoor" or player.status == "Host"):
-                status = "5"
+                status = "10"
             else:
                 host = request.POST.get('host')
                 item = Room.objects.get(host=host)
                 members = item.members.split(';')
-                sequence = ""
+                names = item.names.split(';')
+                colors = item.colors.split(';')
+                seq_members = ""
+                seq_names = ""
+                seq_colors = ""
                 flag = False
                 for i in range(0, len(members)):
                     if int(members[i]) != uid:
                         if flag:
-                            sequence += ';'
-                        sequence += str(members[i])
+                            seq_members += ';'
+                            seq_names += ';'
+                            seq_colors += ';'
+                        seq_members += str(members[i])
+                        seq_names += names[i]
+                        seq_colors += colors[i]
                         flag = True
-                item.members = sequence
+                item.members = seq_members
+                item.names = seq_names
+                item.colors = seq_colors
                 item.num -= 1
                 item.save()
                 if item.num == 0:
