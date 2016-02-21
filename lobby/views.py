@@ -106,7 +106,7 @@ def host_room(request):
                 item.host = int(uid)
                 item.members = item.host
                 item.names = player.name
-                item.color = color[0]
+                item.colors = color[0]
                 item.game = game_init()
                 item.save()
                 player.status = "Host"
