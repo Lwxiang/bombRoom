@@ -24,7 +24,8 @@ def game_init():
     game.wall = '0' * 4 * 4
 
     # Random the Colors
-    game.colors = ";".join(random.shuffle(color))
+    temp_color = list(color)
+    game.colors = ";".join(random.shuffle(temp_color))
     game.save()
 
     return game
