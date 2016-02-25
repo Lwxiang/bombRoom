@@ -177,13 +177,13 @@ def action(request):
                     move = request.POST.get('move')
                     flag = False
                     if move == "turnLeft()":
-                        player.face = (player.face + 1) % 4
+                        player.face = (player.face + 4 - 1) % 4
                         player.save()
                         game.status += process_status(game.no, uid, "tL", player.face, color[game.turn])
                         game.save()
                         flag = True
                     if move == "turnRight()":
-                        player.face = (player.face + 4 - 1) % 4
+                        player.face = (player.face + 1) % 4
                         player.save()
                         game.status += process_status(game.no, uid, "tR", player.face, color[game.turn])
                         game.save()
@@ -193,13 +193,13 @@ def action(request):
                         game.save()
                         x, y = get_position(uid, room, members, game)
                         if player.face == 0:
-                            x = (x + 1) % room.length
-                        if player.face == 1:
                             y = (y + 1) % room.length
+                        if player.face == 1:
+                            x = (x + 1) % room.length
                         if player.face == 2:
-                            x = (x - 1 + room.length) % room.length
-                        if player.face == 3:
                             y = (y - 1 + room.length) % room.length
+                        if player.face == 3:
+                            x = (x - 1 + room.length) % room.length
                         set_position(uid, room, members, game, x, y)
                         flag = True
                     if move == "putBomb()":
