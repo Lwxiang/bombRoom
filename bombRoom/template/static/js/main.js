@@ -211,8 +211,8 @@ function gameStart() {
 			// data.info.ids.filter(function(elem, uid){
 			// 	mycolor = colors[uid];
 			// })[0];
-			alert(uid);
-			mycolor = colors[data.info.ids.indexOf(uid)]
+			alert(user.uid);
+			mycolor = colors[data.info.ids.indexOf(user.uid)]
 			outputLog('<span style="color: ' + mycolor + '">这是您的颜色</span>', 1);
 			start = 1;
 			getLatestMsg();
