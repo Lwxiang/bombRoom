@@ -208,7 +208,7 @@ function gameStart() {
 			outputLog('BOMB ROOM #' + uid + '　房主：' + data.info.name + '　指令上限：' + data.info.energy + '　用户上限：' + data.info.capacity + '　用户列表：' + data.info.players.map(function(elem, index){
 				return '<span style="color: ' + colors[index] + '">' + elem + '</span>';
 			}).join(', ') + ' (' + data.info.num + '/' + data.info.capacity +')', 1);
-			data.info.ids.filter(function(elem, index){
+			data.info.ids.filter(function(uid, index){
 				mycolor = colors[index];
 			})[0];
 			outputLog('<span style="color: ' + mycolor + '">这是您的颜色</span>', 1);
