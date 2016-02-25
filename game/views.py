@@ -22,6 +22,9 @@ def game_init():
     # Make the bomb and the wall init
     game.bomb = '0' * 4 * 4
     game.wall = '0' * 4 * 4
+
+    # Random the Colors
+    game.colors = ";".join(random.shuffle(color))
     game.save()
 
     return game
@@ -172,6 +175,7 @@ def action(request):
                     raise Game.DoesNotExist
                 game.no += 1
                 members = room.members.split(';')
+                game_color = game.colors.split(';')
                 if members[game.turn] != str(uid):
                     status = "8"
                 else:
@@ -180,17 +184,17 @@ def action(request):
                     if move == "turnLeft()":
                         player.face = (player.face + 4 - 1) % 4
                         player.save()
-                        game.status += process_status(game.no, uid, "tL", player.face, color[game.turn])
+                        game.status += process_status(game.no, uid, "tL", player.face, game_color[game.turn])
                         game.save()
                         flag = True
                     if move == "turnRight()":
                         player.face = (player.face + 1) % 4
                         player.save()
-                        game.status += process_status(game.no, uid, "tR", player.face, color[game.turn])
+                        game.status += process_status(game.no, uid, "tR", player.face, game_color[game.turn])
                         game.save()
                         flag = True
                     if move == "goForward()":
-                        game.status += process_status(game.no, uid, "gF", player.face, color[game.turn])
+                        game.status += process_status(game.no, uid, "gF", player.face, game_color[game.turn])
                         game.save()
                         x, y = get_position(uid, room, members, game)
                         if player.face == 0:
@@ -204,7 +208,7 @@ def action(request):
                         set_position(uid, room, members, game, x, y)
                         flag = True
                     if move == "putBomb()":
-                        game.status += process_status(game.no, uid, "pB", player.face, color[game.turn])
+                        game.status += process_status(game.no, uid, "pB", player.face, game_color[game.turn])
                         game.save()
                         x, y = get_position(uid, room, members, game)
                         bomb = game.bomb
@@ -218,7 +222,7 @@ def action(request):
                         game.save()
                         flag = True
                     if move == "endTurn()":
-                        game.status += process_status(game.no, uid, "eT", player.face, color[game.turn])
+                        game.status += process_status(game.no, uid, "eT", player.face, game_color[game.turn])
                         game.times = room.energy
                         game.save()
                         flag = True
@@ -236,7 +240,7 @@ def action(request):
                                 else:
                                     get += bomb[x * room.length + y + 1: room.length * room.length]
                                 game.no += 1
-                                game.status += process_status(game.no, uid, "dD", player.face, color[game.turn])
+                                game.status += process_status(game.no, uid, "dD", player.face, game_color[game.turn])
                                 game.left -= 1
                                 game.save()
                                 player.alive = False
@@ -302,6 +306,7 @@ def query(request):
                 player = Player.objects.get(id=int(uid))
                 room = Room.objects.get(host=player.where)
                 game = room.game
+                game_color = game.colors.split(';')
                 mid = int(request.POST.get('mid'))
                 seq = game.status.split(';')
                 info['uid'] = uid
@@ -316,7 +321,7 @@ def query(request):
                         name = Player.find_name(int(ss[1]))
                         selfs = (int(ss[1]) == int(uid))
                         index = int(room.members.split(';').index(ss[1]))
-                        the_color = color[index] if index > -1 else "#FFFFFF"
+                        the_color = game_color[index] if index > -1 else "#FFFFFF"
                         token = u" <span style=\"color: %s\">%s</span> %s"
                         word = ""
                         if ss[2] == "tL":

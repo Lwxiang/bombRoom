@@ -106,8 +106,8 @@ def host_room(request):
                 item.host = int(uid)
                 item.members = item.host
                 item.names = player.name
-                item.colors = color[0]
                 item.game = game_init()
+                item.colors = item.game.colors.split(';')[0]
                 item.save()
                 player.status = "Host"
                 player.where = int(uid)
@@ -145,7 +145,7 @@ def enter_room(request):
                             item.num += 1
                             item.members += ";" + str(uid)
                             item.names += ";" + player.name
-                            item.colors = ";".join(color[:item.num])
+                            item.colors = ";".join(item.game.colors.split(';')[:item.num])
                             item.save()
 
                             player.status = "Indoor"
