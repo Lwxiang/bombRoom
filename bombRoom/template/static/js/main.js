@@ -225,7 +225,7 @@ function gameStart() {
 function colorMap (order, position) {
 	$('.map').html(getMapString(roomData.length));
 	for (var i = 0; i < order.length; i++) {
-		$('.map tr').eq(position[i].split(',')[1]).children('td').eq(position[i].split(',')[0]).css('background', colors[i]);
+		$('.map tr').eq(position[i].split(',')[0]).children('td').eq(position[i].split(',')[1]).css('background', colors[i]);
 	}
 }
 
