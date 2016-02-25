@@ -137,8 +137,8 @@ def enter_room(request):
                     status = "5"
                 else:
                     host = request.POST.get('host')
-                    item = Room.objects.get(host=host)
-                    if item:
+                    try:
+                        item = Room.objects.get(host=host)
                         if item.game.start:
                             status = "7"
                         elif item.capacity > item.num:
@@ -155,7 +155,7 @@ def enter_room(request):
                             status = "1"
                         else:
                             status = "6"
-                    else:
+                    except Room.DoesNotExist:
                         status = "7"
 
             except Player.DoesNotExist:
@@ -227,18 +227,24 @@ def change_room(request):
             if not (player.status == "Host"):
                 status = "5"
             else:
-                host = request.POST.get('host')
-                item = Room.objects.get(host=host)
-                item.capacity = int(request.POST.get('capacity'))
-                item.length = int(request.POST.get('length'))
-                item.energy = int(request.POST.get('energy'))
-                item.save()
-                game = item.game
-                game.bomb = '0' * item.length * item.length
-                game.wall = '0' * item.length * item.length
-                game.save()
-                item.save()
-                status = "1"
+                try:
+                    host = request.POST.get('host')
+                    item = Room.objects.get(host=host)
+                    item.capacity = int(request.POST.get('capacity'))
+                    item.length = int(request.POST.get('length'))
+                    item.energy = int(request.POST.get('energy'))
+                    if item.capacity > 6 or item.length > 10 or item.energy > 6:
+                        raise Room.DoesNotExist
+                    item.save()
+                    game = item.game
+                    game.bomb = '0' * item.length * item.length
+                    game.wall = '0' * item.length * item.length
+                    game.save()
+                    item.save()
+                    status = "1"
+                except Room.DoesNotExist:
+                    status = "11"
+
     response = HttpResponse(json.dumps({'status': status, 'info': info}))
     return response
 
