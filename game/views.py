@@ -193,13 +193,13 @@ def action(request):
                         game.save()
                         x, y = get_position(uid, room, members, game)
                         if player.face == 0:
-                            y = (y + 1) % room.length
-                        if player.face == 1:
                             x = (x + 1) % room.length
+                        if player.face == 1:
+                            y = (y + 1) % room.length
                         if player.face == 2:
-                            y = (y - 1 + room.length) % room.length
-                        if player.face == 3:
                             x = (x - 1 + room.length) % room.length
+                        if player.face == 3:
+                            y = (y - 1 + room.length) % room.length
                         set_position(uid, room, members, game, x, y)
                         flag = True
                     if move == "putBomb()":
