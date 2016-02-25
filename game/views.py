@@ -343,7 +343,7 @@ def query(request):
                             if selfs:
                                 word += u" 您 提前结束了回合。(现在面向 " + direction[int(ss[3])]
                             else:
-                                word += (token % (the_color, name))
+                                word += (token % (the_color, name, u"执行了一次操作。"))
                         if ss[2] == "dD":
                             if selfs:
                                 word += u" 您 被炸飞了desu。输掉了游戏。"
