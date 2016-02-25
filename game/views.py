@@ -315,38 +315,40 @@ def query(request):
                         xdata['uid'] = ss[1]
                         name = Player.find_name(int(ss[1]))
                         selfs = (int(ss[1]) == int(uid))
+                        index = int(room.members.split(';').index(ss[1]))
+                        the_color = color[index] if index > -1 else "#FFFFFF"
                         token = u" <span style=\"color: %s\">%s</span> %s"
                         word = ""
                         if ss[2] == "tL":
                             if selfs:
                                 word += u" 您 向左转了身。(现在面向 " + direction[int(ss[3])]
                             else:
-                                word += token % (color[int(ss[3])], name, u"执行了一次操作。")
+                                word += token % (the_color, name, u"执行了一次操作。")
                         if ss[2] == "tR":
                             if selfs:
                                 word += u" 您 向右转了身。(现在面向 " + direction[int(ss[3])]
                             else:
-                                word += token % (color[int(ss[3])], name, u"执行了一次操作。")
+                                word += token % (the_color, name, u"执行了一次操作。")
                         if ss[2] == "gF":
                             if selfs:
                                 word += u" 您 向前走了一步。 (现在面向 " + direction[int(ss[3])]
                             else:
-                                word += token % (color[int(ss[3])], name, u"执行了一次操作。")
+                                word += token % (the_color, name, u"执行了一次操作。")
                         if ss[2] == "pB":
                             if selfs:
                                 word += u" 您 安置了一个炸弹！请注意安全！(现在面向 " + direction[int(ss[3])]
                             else:
-                                word += token % (color[int(ss[3])], name, u"执行了一次操作。")
+                                word += token % (the_color, name, u"执行了一次操作。")
                         if ss[2] == "eT":
                             if selfs:
                                 word += u" 您 提前结束了回合。(现在面向 " + direction[int(ss[3])]
                             else:
-                                word += token % (color[int(ss[3])], name)
+                                word += token % (the_color, name)
                         if ss[2] == "dD":
                             if selfs:
                                 word += u" 您 被炸飞了desu。输掉了游戏。"
                             else:
-                                word += token % (color[int(ss[3])], name, u"被人炸飞了。输掉了游戏。")
+                                word += token % (the_color, name, u"被人炸飞了。输掉了游戏。")
                         xdata['content'] = word
                         xdata['color'] = ss[3]
                         info['data'].append(xdata)
