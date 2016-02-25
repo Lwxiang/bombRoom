@@ -25,7 +25,8 @@ def game_init():
 
     # Random the Colors
     temp_color = list(color)
-    game.colors = ";".join(random.shuffle(temp_color))
+    random.shuffle(temp_color)
+    game.colors = ";".join(temp_color)
     game.save()
 
     return game
