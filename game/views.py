@@ -173,7 +173,7 @@ def action(request):
                 game.no += 1
                 members = room.members.split(';')
                 if members[game.turn] != str(uid):
-                    status = "0"
+                    status = "8"
                 else:
                     move = request.POST.get('move')
                     flag = False
@@ -252,7 +252,7 @@ def action(request):
                     else:
                         game.no -= 1
                         game.save()
-                        status = "0"
+                        status = "9"
             except Player.DoesNotExist:
                 status = "4"
             except Room.DoesNotExist:

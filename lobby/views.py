@@ -138,9 +138,10 @@ def enter_room(request):
                 else:
                     host = request.POST.get('host')
                     item = Room.objects.get(host=host)
-                    flag = True
                     if item:
-                        if item.capacity > item.num:
+                        if item.game.start:
+                            status = "7"
+                        elif item.capacity > item.num:
                             item.num += 1
                             item.members += ";" + str(uid)
                             item.names += ";" + player.name
@@ -151,11 +152,11 @@ def enter_room(request):
                             player.where = host
                             player.face = random.randint(0, 3)
                             player.save()
-                            flag = False
-                    if flag:
-                        status = "6"
+                            status = "1"
+                        else:
+                            status = "6"
                     else:
-                        status = "1"
+                        status = "7"
 
             except Player.DoesNotExist:
                 status = "4"
