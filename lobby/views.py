@@ -79,7 +79,7 @@ def room(request):
                 info['length'] = item.length
                 info['capacity'] = item.capacity
                 info['energy'] = item.energy
-                info['ids'] = item.members.split(';')
+                info['uids'] = item.members.split(';')
                 info['players'] = item.names.split(';')
                 info['colors'] = item.colors.split(';')
                 status = "1"
