@@ -108,7 +108,7 @@ function getLatestMsg () {
 				return a.mid - b.mid;
 			});
 			for (var i = 0, j = data.info.data; i < j.length; i++) {
-				outputLog(j[i].content);
+				outputLog(j[i].content, 1);
 				if (j[i].mid - 0 > mid - 0) mid = j[i].mid - 0;
 			}
 			// outputLine.clone().text().appendTo(CodeboxOutput);
