@@ -306,7 +306,7 @@ def query(request):
                 info['uid'] = uid
                 info['name'] = Player.find_name(uid)
                 info['data'] = []
-                direction = (u'东', u'北', u'西', u'南')
+                direction = (u'东', u'南', u'西', u'北')
                 for i in range(0, len(seq) - 1):
                     if i >= mid:
                         xdata = {}
