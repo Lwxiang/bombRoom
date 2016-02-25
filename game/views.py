@@ -201,6 +201,7 @@ def action(request):
                             y = (y - 1 + room.length) % room.length
                         if player.face == 3:
                             x = (x - 1 + room.length) % room.length
+                        return HttpResponse("%d  %d  %d" % (player.face, x, y))
                         set_position(uid, room, members, game, x, y)
                         flag = True
                     if move == "putBomb()":
