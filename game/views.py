@@ -8,6 +8,7 @@ from game.models import Game
 from lobby.models import Player, Room
 
 color = ("#FF0000", "#458B00", "#6959CD", "#FFFF00", "#97FFFF", "#CD2990")
+direction = (u'东', u'南', u'西', u'北')
 
 
 def game_init():
@@ -193,13 +194,13 @@ def action(request):
                         game.save()
                         x, y = get_position(uid, room, members, game)
                         if player.face == 0:
-                            x = (x + 1) % room.length
-                        if player.face == 1:
                             y = (y + 1) % room.length
+                        if player.face == 1:
+                            x = (x + 1) % room.length
                         if player.face == 2:
-                            x = (x - 1 + room.length) % room.length
-                        if player.face == 3:
                             y = (y - 1 + room.length) % room.length
+                        if player.face == 3:
+                            x = (x - 1 + room.length) % room.length
                         set_position(uid, room, members, game, x, y)
                         flag = True
                     if move == "putBomb()":
@@ -306,7 +307,6 @@ def query(request):
                 info['uid'] = uid
                 info['name'] = Player.find_name(uid)
                 info['data'] = []
-                direction = (u'东', u'南', u'西', u'北')
                 for i in range(0, len(seq) - 1):
                     if i >= mid:
                         xdata = {}
