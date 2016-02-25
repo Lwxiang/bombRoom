@@ -203,7 +203,7 @@ function gameStart() {
 //			for (var i = 0; i < data.info.num; i++) {
 //				colors.push('rgb(' + Math.floor(Math.random() * 256) + ',' + Math.floor(Math.random() * 256) + ',' + Math.floor(Math.random() * 256) + ')');
 //			}
-            colors = data.info.colors
+            		colors = data.info.colors
 			$('.map').html(getMapString(data.info.length));
 			outputLog('BOMB ROOM #' + uid + '　房主：' + data.info.name + '　指令上限：' + data.info.energy + '　用户上限：' + data.info.capacity + '　用户列表：' + data.info.players.map(function(elem, index){
 				return '<span style="color: ' + colors[index] + '">' + elem + '</span>';
@@ -211,6 +211,7 @@ function gameStart() {
 			// data.info.ids.filter(function(elem, uid){
 			// 	mycolor = colors[uid];
 			// })[0];
+			alert(uid);
 			mycolor = colors[data.info.ids.indexOf(uid)]
 			outputLog('<span style="color: ' + mycolor + '">这是您的颜色</span>', 1);
 			start = 1;
