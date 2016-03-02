@@ -200,11 +200,13 @@ HTTP请求方式:```POST```
 |length|房间边长|
 |energy|最大每回合步数|
 |num|房间当前人数|
-|players|房间当前的玩家uid列表|
+|ids|房间当前的玩家uid列表|
+|players|房间当前的玩家uid列表(与ids一一对应)|
+|colors|房间当前的玩家颜色列表(与ids一一对应)|
 
 JSON示例:
 
-{"status": "1", "info": {"start": false, "capacity": 5, "name": "\u6d6a\u5473\u9c9c", "energy": 3, "host": 1, "players": ["1", "2"], "length": 4, "num": 2}}
+{"status": "1", "info": {"colors": ["#FF0000"], "capacity": 3, "name": "hello", "players": ["hello"], "energy": 3, "length": 3, "ids": ["8"], "start": false, "host": 8, "num": 1}}
 
 ---
 

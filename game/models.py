@@ -12,3 +12,4 @@ class Game(models.Model):
     times = models.IntegerField(default=0)
     start = models.BooleanField(default=False)
     left = models.IntegerField(default=0)
+    colors = models.CharField(max_length=1000)

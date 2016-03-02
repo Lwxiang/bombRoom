@@ -22,7 +22,20 @@ var colors = [];
 // const BR_CONFIG
 var BR_CONFIG = {
 	serverURL: 'http://115.28.65.51:8080',
-	errorMsg: ['非法操作', 'success', 'method must be post', 'method must be get', 'uid is invalid', 'no authority to do(Who try to change the room infomation is not the host)', 'the room is full or no exist'],
+	errorMsg: [
+		'未知非法操作',
+		'success',
+		'method must be post',
+		'method must be get',
+		'uid is invalid',
+		'no authority to do',
+		'房间已满',
+		'房间不存在或游戏已经开始',
+		'还没轮到您的回合',
+		'指令有误,请重新输入',
+		'游戏已经开始',
+		'最大参数:(6, 10, 6)'
+	],
 	formURL: {
 		allot: '/allot/',
 		host: '/host/',
@@ -129,7 +142,7 @@ function getLatestMsg () {
 				return a.mid - b.mid;
 			});
 			for (var i = 0, j = data.info.data; i < j.length; i++) {
-				outputLog(j[i].content);
+				outputLog(j[i].content, 1);
 				if (j[i].mid - 0 > mid - 0) mid = j[i].mid - 0;
 			}
 			checkMsgTimer = setTimeout(getLatestMsg, 5000);
@@ -220,16 +233,15 @@ function gameStart() {
 		success: function(data) {
 			if (data.status != 1) return outputLog('初始化失败：' + getErrorMsg(data.status));
 			roomData = data.info;
-			for (var i = 0; i < data.info.num; i++) {
-				colors.push('rgb(' + Math.floor(Math.random() * 256) + ',' + Math.floor(Math.random() * 256) + ',' + Math.floor(Math.random() * 256) + ')');
-			}
+//			for (var i = 0; i < data.info.num; i++) {
+//				colors.push('rgb(' + Math.floor(Math.random() * 256) + ',' + Math.floor(Math.random() * 256) + ',' + Math.floor(Math.random() * 256) + ')');
+//			}
+            		colors = data.info.colors
 			$('.map').html(getMapString(data.info.length));
 			outputLog('BOMB ROOM #' + uid + '　房主：' + data.info.name + '　指令上限：' + data.info.energy + '　用户上限：' + data.info.capacity + '　用户列表：' + data.info.players.map(function(elem, index){
 				return '<span style="color: ' + colors[index] + '">' + elem + '</span>';
 			}).join(', ') + ' (' + data.info.num + '/' + data.info.capacity +')', 1);
-			data.info.players.filter(function(elem, index){
-				mycolor = colors[index];
-			})[0];
+                        mycolor = colors[data.info.uids.indexOf(user.uid.toString())];
 			outputLog('<span style="color: ' + mycolor + '">这是您的颜色</span>', 1);
 			start = 1;
 			getLatestMsg();
@@ -244,7 +256,7 @@ function gameStart() {
 function colorMap (order, position) {
 	$('.map').html(getMapString(roomData.length));
 	for (var i = 0; i < order.length; i++) {
-		$('.map tr').eq(position[i].split(',')[1]).children('td').eq(position[i].split(',')[0]).css('background', colors[i]);
+		$('.map tr').eq(position[i].split(',')[0]).children('td').eq(position[i].split(',')[1]).css('background', colors[i]);
 	}
 }
 

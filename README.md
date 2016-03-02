@@ -1,7 +1,7 @@
 # bombRoom
 A simple web game.
 
-[游戏在这](http://115.28.65.51:8080/index/)
+[游戏在这](http://115.28.65.51:8080/)
 
 ## NOTICE
 

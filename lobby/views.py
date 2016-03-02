@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from django.shortcuts import render_to_response
 
 from lobby.models import Player, Room
-from game.views import game_init
+from game.views import game_init, color
 
 
 def index(request):
@@ -79,7 +79,9 @@ def room(request):
                 info['length'] = item.length
                 info['capacity'] = item.capacity
                 info['energy'] = item.energy
-                info['players'] = item.members.split(';')
+                info['uids'] = item.members.split(';')
+                info['players'] = item.names.split(';')
+                info['colors'] = item.colors.split(';')
                 status = "1"
             except Room.DoesNotExist:
                 status = "5"
@@ -103,7 +105,9 @@ def host_room(request):
                 item = Room()
                 item.host = int(uid)
                 item.members = item.host
+                item.names = player.name
                 item.game = game_init()
+                item.colors = item.game.colors.split(';')[0]
                 item.save()
                 player.status = "Host"
                 player.where = int(uid)
@@ -133,23 +137,26 @@ def enter_room(request):
                     status = "5"
                 else:
                     host = request.POST.get('host')
-                    item = Room.objects.get(host=host)
-                    flag = True
-                    if item:
-                        if item.capacity > item.num:
+                    try:
+                        item = Room.objects.get(host=host)
+                        if item.game.start:
+                            status = "7"
+                        elif item.capacity > item.num:
                             item.num += 1
                             item.members += ";" + str(uid)
+                            item.names += ";" + player.name
+                            item.colors = ";".join(item.game.colors.split(';')[:item.num])
                             item.save()
 
                             player.status = "Indoor"
                             player.where = host
                             player.face = random.randint(0, 3)
                             player.save()
-                            flag = False
-                    if flag:
-                        status = "6"
-                    else:
-                        status = "1"
+                            status = "1"
+                        else:
+                            status = "6"
+                    except Room.DoesNotExist:
+                        status = "7"
 
             except Player.DoesNotExist:
                 status = "4"
@@ -168,20 +175,30 @@ def leave_room(request):
             uid = request.session.get('uid')
             player = Player.objects.get(id=uid)
             if not (player.status == "Indoor" or player.status == "Host"):
-                status = "5"
+                status = "10"
             else:
                 host = request.POST.get('host')
                 item = Room.objects.get(host=host)
                 members = item.members.split(';')
-                sequence = ""
+                names = item.names.split(';')
+                colors = item.colors.split(';')
+                seq_members = ""
+                seq_names = ""
+                seq_colors = ""
                 flag = False
                 for i in range(0, len(members)):
                     if int(members[i]) != uid:
                         if flag:
-                            sequence += ';'
-                        sequence += str(members[i])
+                            seq_members += ';'
+                            seq_names += ';'
+                            seq_colors += ';'
+                        seq_members += str(members[i])
+                        seq_names += names[i]
+                        seq_colors += colors[i]
                         flag = True
-                item.members = sequence
+                item.members = seq_members
+                item.names = seq_names
+                item.colors = seq_colors
                 item.num -= 1
                 item.save()
                 if item.num == 0:
@@ -210,18 +227,24 @@ def change_room(request):
             if not (player.status == "Host"):
                 status = "5"
             else:
-                host = request.POST.get('host')
-                item = Room.objects.get(host=host)
-                item.capacity = int(request.POST.get('capacity'))
-                item.length = int(request.POST.get('length'))
-                item.energy = int(request.POST.get('energy'))
-                item.save()
-                game = item.game
-                game.bomb = '0' * item.length * item.length
-                game.wall = '0' * item.length * item.length
-                game.save()
-                item.save()
-                status = "1"
+                try:
+                    host = request.POST.get('host')
+                    item = Room.objects.get(host=host)
+                    item.capacity = int(request.POST.get('capacity'))
+                    item.length = int(request.POST.get('length'))
+                    item.energy = int(request.POST.get('energy'))
+                    if item.capacity > 6 or item.length > 10 or item.energy > 6:
+                        raise Room.DoesNotExist
+                    item.save()
+                    game = item.game
+                    game.bomb = '0' * item.length * item.length
+                    game.wall = '0' * item.length * item.length
+                    game.save()
+                    item.save()
+                    status = "1"
+                except Room.DoesNotExist:
+                    status = "11"
+
     response = HttpResponse(json.dumps({'status': status, 'info': info}))
     return response
 

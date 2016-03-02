@@ -8,6 +8,7 @@ from game.models import Game
 from lobby.models import Player, Room
 
 color = ("#FF0000", "#458B00", "#6959CD", "#FFFF00", "#97FFFF", "#CD2990")
+direction = (u'东', u'南', u'西', u'北')
 
 
 def game_init():
@@ -21,6 +22,11 @@ def game_init():
     # Make the bomb and the wall init
     game.bomb = '0' * 4 * 4
     game.wall = '0' * 4 * 4
+
+    # Random the Colors
+    temp_color = list(color)
+    random.shuffle(temp_color)
+    game.colors = ";".join(temp_color)
     game.save()
 
     return game
@@ -171,39 +177,40 @@ def action(request):
                     raise Game.DoesNotExist
                 game.no += 1
                 members = room.members.split(';')
+                game_color = game.colors.split(';')
                 if members[game.turn] != str(uid):
-                    status = "0"
+                    status = "8"
                 else:
                     move = request.POST.get('move')
                     flag = False
                     if move == "turnLeft()":
-                        player.face = (player.face + 1) % 4
+                        player.face = (player.face + 4 - 1) % 4
                         player.save()
-                        game.status += process_status(game.no, uid, "tL", player.face, color[game.turn])
+                        game.status += process_status(game.no, uid, "tL", player.face, game_color[game.turn])
                         game.save()
                         flag = True
                     if move == "turnRight()":
-                        player.face = (player.face + 4 - 1) % 4
+                        player.face = (player.face + 1) % 4
                         player.save()
-                        game.status += process_status(game.no, uid, "tR", player.face, color[game.turn])
+                        game.status += process_status(game.no, uid, "tR", player.face, game_color[game.turn])
                         game.save()
                         flag = True
                     if move == "goForward()":
-                        game.status += process_status(game.no, uid, "gF", player.face, color[game.turn])
+                        game.status += process_status(game.no, uid, "gF", player.face, game_color[game.turn])
                         game.save()
                         x, y = get_position(uid, room, members, game)
                         if player.face == 0:
-                            x = (x + 1) % room.length
-                        if player.face == 1:
                             y = (y + 1) % room.length
+                        if player.face == 1:
+                            x = (x + 1) % room.length
                         if player.face == 2:
-                            x = (x - 1 + room.length) % room.length
-                        if player.face == 3:
                             y = (y - 1 + room.length) % room.length
+                        if player.face == 3:
+                            x = (x - 1 + room.length) % room.length
                         set_position(uid, room, members, game, x, y)
                         flag = True
                     if move == "putBomb()":
-                        game.status += process_status(game.no, uid, "pB", player.face, color[game.turn])
+                        game.status += process_status(game.no, uid, "pB", player.face, game_color[game.turn])
                         game.save()
                         x, y = get_position(uid, room, members, game)
                         bomb = game.bomb
@@ -217,7 +224,7 @@ def action(request):
                         game.save()
                         flag = True
                     if move == "endTurn()":
-                        game.status += process_status(game.no, uid, "eT", player.face, color[game.turn])
+                        game.status += process_status(game.no, uid, "eT", player.face, game_color[game.turn])
                         game.times = room.energy
                         game.save()
                         flag = True
@@ -235,7 +242,7 @@ def action(request):
                                 else:
                                     get += bomb[x * room.length + y + 1: room.length * room.length]
                                 game.no += 1
-                                game.status += process_status(game.no, uid, "dD", player.face, color[game.turn])
+                                game.status += process_status(game.no, uid, "dD", player.face, game_color[game.turn])
                                 game.left -= 1
                                 game.save()
                                 player.alive = False
@@ -251,7 +258,7 @@ def action(request):
                     else:
                         game.no -= 1
                         game.save()
-                        status = "0"
+                        status = "9"
             except Player.DoesNotExist:
                 status = "4"
             except Room.DoesNotExist:
@@ -301,12 +308,12 @@ def query(request):
                 player = Player.objects.get(id=int(uid))
                 room = Room.objects.get(host=player.where)
                 game = room.game
+                game_color = game.colors.split(';')
                 mid = int(request.POST.get('mid'))
                 seq = game.status.split(';')
                 info['uid'] = uid
                 info['name'] = Player.find_name(uid)
                 info['data'] = []
-                direction = (u'东', u'北', u'西', u'南')
                 for i in range(0, len(seq) - 1):
                     if i >= mid:
                         xdata = {}
@@ -315,37 +322,40 @@ def query(request):
                         xdata['uid'] = ss[1]
                         name = Player.find_name(int(ss[1]))
                         selfs = (int(ss[1]) == int(uid))
+                        index = int(room.members.split(';').index(ss[1]))
+                        the_color = game_color[index] if index > -1 else "#FFFFFF"
+                        token = u" <span style=\"color: %s\">%s</span> %s"
                         word = ""
                         if ss[2] == "tL":
                             if selfs:
                                 word += u" 您 向左转了身。(现在面向 " + direction[int(ss[3])]
                             else:
-                                word += " " + name + u" 执行了一次操作"
+                                word += (token % (the_color, name, u"执行了一次操作。"))
                         if ss[2] == "tR":
                             if selfs:
                                 word += u" 您 向右转了身。(现在面向 " + direction[int(ss[3])]
                             else:
-                                word += " " + name + u" 执行了一次操作"
+                                word += (token % (the_color, name, u"执行了一次操作。"))
                         if ss[2] == "gF":
                             if selfs:
-                                word += u" 您 向前走了一步(现在面向 " + direction[int(ss[3])]
+                                word += (u" 您 向前走了一步。 (现在面向 " + direction[int(ss[3])])
                             else:
-                                word += " " + name + u" 执行了一次操作"
+                                word += (token % (the_color, name, u"执行了一次操作。"))
                         if ss[2] == "pB":
                             if selfs:
                                 word += u" 您 安置了一个炸弹！请注意安全！(现在面向 " + direction[int(ss[3])]
                             else:
-                                word += " " + name + u" 执行了一次操作"
+                                word += (token % (the_color, name, u"执行了一次操作。"))
                         if ss[2] == "eT":
                             if selfs:
                                 word += u" 您 提前结束了回合。(现在面向 " + direction[int(ss[3])]
                             else:
-                                word += " " + name + u" 执行了一次操作"
+                                word += (token % (the_color, name, u"执行了一次操作。"))
                         if ss[2] == "dD":
                             if selfs:
                                 word += u" 您 被炸飞了desu。输掉了游戏。"
                             else:
-                                word += " " + name + u"被人炸飞了。输掉了游戏。"
+                                word += (token % (the_color, name, u"被人炸飞了。输掉了游戏。"))
                         xdata['content'] = word
                         xdata['color'] = ss[3]
                         info['data'].append(xdata)

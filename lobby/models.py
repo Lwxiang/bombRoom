@@ -7,6 +7,8 @@ from game.models import Game
 class Room(models.Model):
     host = models.IntegerField(max_length=100)
     members = models.CharField(max_length=100)
+    colors = models.CharField(max_length=100)
+    names = models.CharField(max_length=1000)
     num = models.IntegerField(default=1)
     capacity = models.IntegerField(default=4)
     length = models.IntegerField(default=4)
