@@ -156,7 +156,7 @@ function getLatestMsg (drawMap) {
 			// 判断数据是否有更新，以减少无必要的地图绘制操作
 			if (drawMap || (start && data.info.data.length > 0)) colorMap(data.info.order_name, colors, data.info.position);
 
-			checkTurn();
+			checkTurn(drawMap);
 		},
 		dataType: 'json'
 	});
@@ -199,19 +199,20 @@ function getLatestMsg (drawMap) {
 					}
 
 					// 若人数没改变，则一定没有人退出，减少多余运算
-					if (data.info.num - newPlayers.length === roomData.info.num) return curData = data;
+					if (data.info.num - newPlayers.length !== roomData.info.num) { 
 
-					// 筛选出离开的 player 并将颜色值缓存进 tmpColors 中
-					var leavePlayers = roomData.info.players.filter(function(elem, index){
-						if (data.info.players.indexOf(elem) < 0) {
-							tmpColors.push(roomData.info.colors[index]);
-							return 1;
+						// 筛选出离开的 player 并将颜色值缓存进 tmpColors 中
+						var leavePlayers = roomData.info.players.filter(function(elem, index){
+							if (data.info.players.indexOf(elem) < 0) {
+								tmpColors.push(roomData.info.colors[index]);
+								return 1;
+							}
+						}).map(function(elem){
+							return '<span style="color: ' + tmpColors.shift() + '">' + elem.toSafeString() + '</span>';
+						});
+						if (leavePlayers.length > 0) {
+							outputLog('[ ' + leavePlayers.join(', ') + ' ] 离开了房间 (' + data.info.num + '/' + data.info.capacity +')', 1);
 						}
-					}).map(function(elem){
-						return '<span style="color: ' + tmpColors.shift() + '">' + elem.toSafeString() + '</span>';
-					});
-					if (leavePlayers.length > 0) {
-						outputLog('[ ' + leavePlayers.join(', ') + ' ] 离开了房间 (' + data.info.num + '/' + data.info.capacity +')', 1);
 					}
 
 					curData = data;
@@ -227,7 +228,7 @@ function getLatestMsg (drawMap) {
 	}
 }
 
-function checkTurn () {
+function checkTurn (firstInit) {
 	if (!start) return;
 	$.ajax({
 		method: 'GET',
@@ -240,7 +241,8 @@ function checkTurn () {
 		},
 		success: function(data) {
 			if (data.status == status) return;
-			if (data.status == 1) outputLog('现在轮到您了。');
+			if (data.status == 1) outputLog('现在轮到您了');
+			else if (firstInit && data.status == 0) outputLog('现在轮到对方了');
 			else if (data.status == 7) {
 				outputLog('您取得了最终的胜利！');
 				start = 0;
