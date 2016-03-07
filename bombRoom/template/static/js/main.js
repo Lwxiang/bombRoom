@@ -11,7 +11,6 @@ var userList;
 var uid;
 var mid = 0;
 var checkMsgTimer;
-var num;
 var start = 0;
 var energy = 0;
 var status = -1;
@@ -19,6 +18,7 @@ var mycolor;
 var roomData;
 var userData;
 var colors = [];
+var isHost = 0;
 // const BR_CONFIG
 var BR_CONFIG = {
 	serverURL: 'http://115.28.65.51:8080',
@@ -55,7 +55,7 @@ function getErrorMsg (status) {
 	return BR_CONFIG.errorMsg[status];
 }
 
-function getMapString (length) {
+function getMapString (length, userColors) {
 	var mapString = '<table border="1">';
 	var trString = '<tr height="' + 100 / length + '%">';
 	var tdString = '<td width="' + 100 / length + '%"></td>';
@@ -72,6 +72,10 @@ function getMapString (length) {
 function getFormURL (type) {
 	if (!BR_CONFIG.formURL[type]) throw new Error(type + ' is not defined in BR_CONFIG.formURL');
 	return BR_CONFIG.serverURL + BR_CONFIG.formURL[type];
+}
+
+String.prototype.toSafeString = function() {
+	return this.replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 function checkForm ($form) {
@@ -96,6 +100,7 @@ function outputLog (log, html) {
 	if (!html) curLine.text(log);
 	else curLine.html(log);
 	curLine.appendTo(CodeboxOutput);
+	CodeboxOutput.scrollTop = CodeboxOutput.scrollHeight;
 }
 
 function showRoom (id) {
@@ -118,14 +123,14 @@ function showRoom (id) {
 			$('.map').html(getMapString(data.info.length));
 			outputLog('欢迎来到 BOMB ROOM！');
 			outputLog('可用指令：<code>turnLeft()</code> 向左转<br>　　　　　<code>turnRight()</code> 向右转<br>　　　　　<code>goForward()</code> 向前走<br>　　　　　<code>putBomb()</code> 放下炸弹<br>　　　　　<code>endTurn()</code> 提前结束此回合', 1);
-			outputLog('BOMB ROOM #' + id + '　房主：' + data.info.name + '　指令上限：' + data.info.energy + '　用户上限：' + data.info.capacity /*+ '　用户列表：' + data.info.players.join(', ') */+ ' (' + data.info.num + '/' + data.info.capacity +')');
+			//outputLog('BOMB ROOM #' + id + '　房主：' + data.info.name + '　指令上限：' + data.info.energy + '　用户上限：' + data.info.capacity /*+ '　用户列表：' + data.info.players.join(', ') */+ ' (' + data.info.num + '/' + data.info.capacity +')');
 			getLatestMsg();
 		},
 		dataType: 'json'
 	});
 }
 
-function getLatestMsg () {
+function getLatestMsg (isStart) {
 	clearTimeout(checkMsgTimer);
 	$.ajax({
 		method: 'POST',
@@ -148,7 +153,11 @@ function getLatestMsg () {
 			checkMsgTimer = setTimeout(getLatestMsg, 5000);
 			$('.codebox-output').scrollTop(CodeboxOutput.height());
 			userData = data.info;
-			start && colorMap(data.info.order_id, data.info.position);
+
+			// 判断数据是否有更新，以减少无必要的地图绘制操作
+			if (isStart || (start && data.info.data.length > 0)) colorMap(data.info.order_name, colors, data.info.position);
+
+			checkTurn();
 		},
 		dataType: 'json'
 	});
@@ -163,16 +172,56 @@ function getLatestMsg () {
 				host: uid
 			},
 			success: function(data) {
-				if (data.info.num != num) {
-					outputLog('BOMB ROOM #' + uid + '　房主：' + data.info.name + '　指令上限：' + data.info.energy + '　用户上限：' + data.info.capacity /*+ '　用户列表：' + data.info.players.join(', ')*/ + ' (' + data.info.num + '/' + data.info.capacity +')');
-					num = data.info.num;
+				if (!roomData) {
+					roomData = data;
+					outputLog('BOMB ROOM #' + uid
+						+ '　房主：' + data.info.name
+						+ '　指令上限：' + data.info.energy 
+						//+ '　用户上限：' + data.info.capacity 
+						+ '　用户列表：[ ' + data.info.players.map(function(elem, index){
+							return '<span style="color: ' + data.info.colors[index] + '">' + elem.toSafeString() + '</span>';
+						}).join(', ')
+						+ ' ] (' + data.info.num + '/' + data.info.capacity +')', 1);
+				}
+				else {
+					var tmpColors = [];
+
+					// 筛选出新增加的 player 并将颜色值缓存进 tmpColors 中
+					var newPlayers = data.info.players.filter(function(elem, index){
+						if (roomData.info.players.indexOf(elem) < 0) {
+							tmpColors.push(data.info.colors[index]);
+							return 1;
+						}
+					}).map(function(elem){
+						return '<span style="color: ' + tmpColors.shift() + '">' + elem.toSafeString() + '</span>';
+					});
+					if (newPlayers.length > 0) {
+						outputLog('[ ' + newPlayers.join(', ') + ' ] 加入了房间 (' + data.info.num + '/' + data.info.capacity +')', 1);
+					}
+
+					// 若人数没改变，则一定没有人退出，减少多余运算
+					if (data.info.num - newPlayers.length === roomData.info.num) return curData = data;
+
+					// 筛选出离开的 player 并将颜色值缓存进 tmpColors 中
+					var leavePlayers = roomData.info.players.filter(function(elem, index){
+						if (data.info.players.indexOf(elem) < 0) {
+							tmpColors.push(roomData.info.colors[index]);
+							return 1;
+						}
+					}).map(function(elem){
+						return '<span style="color: ' + tmpColors.shift() + '">' + elem.toSafeString() + '</span>';
+					});
+					if (leavePlayers.length > 0) {
+						outputLog('[ ' + leavePlayers.join(', ') + ' ] 离开了房间 (' + data.info.num + '/' + data.info.capacity +')', 1);
+					}
+
+					curData = data;
 				}
 			},
 			dataType: 'json'
 		});
 		if (uid != user.uid) checkStart();
 	}
-	else checkTurn();
 }
 
 function checkStart () {
@@ -213,6 +262,7 @@ function checkTurn () {
 			else if (data.status == 7) {
 				outputLog('您取得了最终的胜利！');
 				start = 0;
+				if (isHost) $('.button-start').show();
 			}
 			status = data.status;
 		},
@@ -232,19 +282,25 @@ function gameStart() {
 		},
 		success: function(data) {
 			if (data.status != 1) return outputLog('初始化失败：' + getErrorMsg(data.status));
+
 			roomData = data.info;
-//			for (var i = 0; i < data.info.num; i++) {
-//				colors.push('rgb(' + Math.floor(Math.random() * 256) + ',' + Math.floor(Math.random() * 256) + ',' + Math.floor(Math.random() * 256) + ')');
-//			}
-            		colors = data.info.colors
+            colors = data.info.colors;
 			$('.map').html(getMapString(data.info.length));
-			outputLog('BOMB ROOM #' + uid + '　房主：' + data.info.name + '　指令上限：' + data.info.energy + '　用户上限：' + data.info.capacity + '　用户列表：' + data.info.players.map(function(elem, index){
-				return '<span style="color: ' + colors[index] + '">' + elem + '</span>';
-			}).join(', ') + ' (' + data.info.num + '/' + data.info.capacity +')', 1);
-                        mycolor = colors[data.info.uids.indexOf(user.uid.toString())];
+
+			outputLog('游戏开始啦~~~');
+			outputLog('BOMB ROOM #' + uid
+				+ '　房主：' + data.info.name
+				+ '　指令上限：' + data.info.energy 
+				//+ '　用户上限：' + data.info.capacity 
+				+ '　用户列表：[ ' + data.info.players.map(function(elem, index){
+					return '<span style="color: ' + data.info.colors[index] + '">' + elem.toSafeString() + '</span>';
+				}).join(', ')
+				+ ' ] (' + data.info.num + '/' + data.info.capacity +')', 1);
+
+            mycolor = colors[data.info.uids.indexOf(user.uid.toString())];
 			outputLog('<span style="color: ' + mycolor + '">这是您的颜色</span>', 1);
 			start = 1;
-			getLatestMsg();
+			getLatestMsg(1);
 		},
 		error: function (e) {
 			return message.addClass('show').text('HTTP Error ' + e.status + ': ' + e.statusText);
@@ -253,10 +309,12 @@ function gameStart() {
 	});
 }
 
-function colorMap (order, position) {
+function colorMap (orders, colors, position) {
 	$('.map').html(getMapString(roomData.length));
-	for (var i = 0; i < order.length; i++) {
-		$('.map tr').eq(position[i].split(',')[0]).children('td').eq(position[i].split(',')[1]).css('background', colors[i]);
+
+	for (var i = 0; i < orders.length; i++) {
+		var p = position[i].split(',');
+		$('.map tr').eq(p[0]).children('td').eq(p[1]).attr('title', orders[i]).css('background', colors[i]);
 	}
 }
 
@@ -351,7 +409,9 @@ $('.form-create').on('submit', function (event) {
 					setTimeout(function(){
 						page.removeClass('front-page').addClass('room-page');
 						showRoom(user.uid);
+						message.text('').removeClass('show');
 					}, 1000);
+					isHost = 1;
 				},
 				error: function (e) {
 					return message.addClass('show').text('HTTP Error ' + e.status + ': ' + e.statusText);
@@ -384,6 +444,8 @@ $('.form-enter').on('submit', function (event) {
 			uid = formData.host;
 			page.removeClass('front-page').addClass('room-page');
 			showRoom(uid);
+			isHost = 0;
+			message.text('').removeClass('show');
 		},
 		error: function (e) {
 			return message.addClass('show').text('HTTP Error ' + e.status + ': ' + e.statusText);
