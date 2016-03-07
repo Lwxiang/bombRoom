@@ -123,14 +123,13 @@ function showRoom (id) {
 			$('.map').html(getMapString(data.info.length));
 			outputLog('欢迎来到 BOMB ROOM！');
 			outputLog('可用指令：<code>turnLeft()</code> 向左转<br>　　　　　<code>turnRight()</code> 向右转<br>　　　　　<code>goForward()</code> 向前走<br>　　　　　<code>putBomb()</code> 放下炸弹<br>　　　　　<code>endTurn()</code> 提前结束此回合', 1);
-			//outputLog('BOMB ROOM #' + id + '　房主：' + data.info.name + '　指令上限：' + data.info.energy + '　用户上限：' + data.info.capacity /*+ '　用户列表：' + data.info.players.join(', ') */+ ' (' + data.info.num + '/' + data.info.capacity +')');
 			getLatestMsg();
 		},
 		dataType: 'json'
 	});
 }
 
-function getLatestMsg (isStart) {
+function getLatestMsg (drawMap) {
 	clearTimeout(checkMsgTimer);
 	$.ajax({
 		method: 'POST',
@@ -155,7 +154,7 @@ function getLatestMsg (isStart) {
 			userData = data.info;
 
 			// 判断数据是否有更新，以减少无必要的地图绘制操作
-			if (isStart || (start && data.info.data.length > 0)) colorMap(data.info.order_name, colors, data.info.position);
+			if (drawMap || (start && data.info.data.length > 0)) colorMap(data.info.order_name, colors, data.info.position);
 
 			checkTurn();
 		},
@@ -216,33 +215,16 @@ function getLatestMsg (isStart) {
 					}
 
 					curData = data;
+
+					if (uid != user.uid && data.info.start) {
+						start = 1;
+						gameStart();
+					}
 				}
 			},
 			dataType: 'json'
 		});
-		if (uid != user.uid) checkStart();
 	}
-}
-
-function checkStart () {
-	if (uid == user.uid || start) return;
-	$.ajax({
-		method: 'GET',
-		url: getFormURL('wait'),
-		xhrFields: {
-			withCredentials: true
-		},
-		data: {
-			host: uid
-		},
-		success: function(data) {
-			if (data.status != 1) return;
-			outputLog('游戏已开始。');
-			start = 1;
-			gameStart();
-		},
-		dataType: 'json'
-	});
 }
 
 function checkTurn () {
@@ -459,7 +441,7 @@ CodeboxInput.on('keypress', function (event) {
 	// CodeboxInput.text(CodeboxInput.text()); // 去除 HTML 标签
 	if (event.keyCode === 13) {
 		var value = CodeboxInput.text().trim();
-		outputLog('<code>' + value.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</code>', 1);
+		outputLog('<code>' + value.toSafeString() + '</code>', 1);
 		CodeboxInput.text('');
 		if (value !== '') {
 			$.ajax({
