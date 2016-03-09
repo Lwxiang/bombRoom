@@ -215,7 +215,7 @@ function getLatestMsg (drawMap) {
 						}
 					}
 
-					curData = data;
+					roomData = data;
 
 					if (uid != user.uid && data.info.start) {
 						start = 1;
