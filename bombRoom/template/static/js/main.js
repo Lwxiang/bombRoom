@@ -156,7 +156,7 @@ function getLatestMsg (drawMap) {
 			// 判断数据是否有更新，以减少无必要的地图绘制操作
 			if (drawMap || (start && data.info.data.length > 0)) colorMap(data.info.order_name, colors, data.info.position);
 
-			checkTurn(drawMap);
+			checkTurn();
 		},
 		dataType: 'json'
 	});
@@ -228,7 +228,7 @@ function getLatestMsg (drawMap) {
 	}
 }
 
-function checkTurn (firstInit) {
+function checkTurn () {
 	if (!start) return;
 	$.ajax({
 		method: 'GET',
@@ -242,7 +242,7 @@ function checkTurn (firstInit) {
 		success: function(data) {
 			if (data.status == status) return;
 			if (data.status == 1) outputLog('现在轮到您了');
-			else if (firstInit && data.status == 0) outputLog('现在轮到对方了');
+			else if (data.status == 0) outputLog('现在轮到对方了');
 			else if (data.status == 7) {
 				outputLog('您取得了最终的胜利！');
 				start = 0;

@@ -1,8 +1,8 @@
 @font-face {
-    font-family: 'Roboto Slab';
-    font-style: normal;
-    font-weight: 400;
-    src: local('Roboto Slab Regular'), local('RobotoSlab-Regular'), url(../font/Roboto_Slab_400.woff2) format('woff2'), url(../font/Roboto_Slab_400.woff) format('woff');
+	font-family: 'Roboto Slab';
+	font-style: normal;
+	font-weight: 400;
+	src: local('Roboto Slab Regular'), local('RobotoSlab-Regular'), url(../font/Roboto_Slab_400.woff2) format('woff2'), url(../font/Roboto_Slab_400.woff) format('woff');
 }
 
 @font-face {
@@ -316,7 +316,8 @@ body, input, textarea, select, button {
 .room-page .codebox {
 	position: absolute;
 	height: 100%;
-	margin-left: 220px;
+	/*margin-left: 220px;*/
+	margin-left: 5%;
 	top: 0;
 	left: 0;
 	right: 0;
@@ -332,6 +333,7 @@ body, input, textarea, select, button {
 	left: 0;
 	right: 0;
 	overflow: auto;
+	margin-left: 220px;
 }
 
 .codebox-output-line, .codebox-input {
@@ -361,6 +363,7 @@ body, input, textarea, select, button {
 	bottom: 0;
 	height: 20px;
 	margin: 0;
+	margin-left: 220px;
 	font-family: monospace;
 }
 
